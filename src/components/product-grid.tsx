@@ -1,4 +1,4 @@
-import { Product } from "@/types";
+import { Product } from "@/types/products";
 import ProductItem from "./product-item";
 import { HTMLAttributes } from "react";
 
@@ -15,7 +15,7 @@ export default function ProductGrid({
 }: ProductGridProps) {
   return (
     <div
-      className={"grid grid-cols-2 px-4 py-2 gap-4 ".concat(className ?? "")}
+      className={"grid grid-cols-2 px-4 py-2 gap-6 ".concat(className ?? "")}
       {...props}
     >
       {products.map((product) => (

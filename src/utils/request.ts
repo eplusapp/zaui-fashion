@@ -18,7 +18,14 @@ export async function request<T>(
   if (!API_URL) {
     await new Promise((resolve) => setTimeout(resolve, 500));
   }
-  const response = await fetch(url, options);
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      ...(options?.headers || {}),
+    },
+  });
   return response.json() as T;
 }
 

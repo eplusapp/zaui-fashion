@@ -17,6 +17,7 @@ module.exports = {
         subtitle: "var(--subtitle)",
         danger: "var(--danger)",
         skeleton: "var(--skeleton)",
+        'primary-eco-blue': "var(--primary-eco-blue)",
       },
       fontSize: {
         "3xs": ["11px", "16px"],

@@ -1,0 +1,123 @@
+export interface ProductImage {
+  slug: string;
+  path: string;
+  size: string;
+  type: "image" | "thumbnail" | "meta_image" | string;
+}
+
+export interface ProductTag {
+  [key: string]: unknown;
+}
+
+export interface ProductDetailItem {
+  key?: string;
+  value?: string;
+  content?: string;
+}
+
+export interface ProductDetailSection {
+  items: ProductDetailItem[];
+  coverUrl?: string;
+}
+
+export interface ProductDetail {
+  ingredients: ProductDetailSection;
+  specifications: ProductDetailSection;
+  effects: ProductDetailSection;
+  advantages: ProductDetailSection;
+  features: ProductDetailSection;
+  researches: ProductDetailSection;
+  faqs: ProductDetailSection;
+
+  video: {
+    youtube: string;
+  };
+}
+
+export interface Product {
+  id?: string;
+
+  name: string;
+  description: string;
+
+  original_price: string | number;
+  discount_price: number;
+
+  is_flash_sale: boolean;
+  flash_sale_price: number;
+  flash_sale_sold_count: number;
+  flash_sale_remaining_quantity: number;
+
+  product_origin: string;
+  product_gender: string;
+
+  product_age_min: string;
+  product_age_max: string;
+
+  display: string;
+
+  product_code: string;
+  product_id: string;
+
+  ingredient: string;
+  benefit: string;
+
+  brand: string;
+
+  product_type: string;
+
+  expired_date: string;
+
+  sku: string;
+  unit: string;
+
+  created_at: string;
+
+  product_detail: ProductDetail | string;
+
+  tag: ProductTag[];
+
+  images: ProductImage[];
+
+  relateds: string;
+
+  slug: string;
+
+  order: string;
+
+  quantity: number;
+
+  sell_on: string[];
+
+  weight: number;
+
+  comboProducts: string[];
+}
+
+type ProductParams = {
+  limit?: number;
+  sort_by?: string;
+  sort_type?: string;
+  sell_on?: string[];
+  is_flash_sale: boolean;
+};
+
+export type FlashSaleProduct = {
+  id: string;
+  product_id: string;
+  brand: string;
+  discount_percentage: number;
+};
+
+export type FlashSaleSetting = {
+  active: boolean;
+  isEffective: boolean;
+  start_time: string;
+  end_time: string;
+  products: FlashSaleProduct[];
+};
+
+export type FlashSaleSettingRes = {
+  data: FlashSaleSetting | undefined;
+
+};
