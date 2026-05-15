@@ -5,6 +5,7 @@ import { requestWithFallback } from "@/utils/request";
 import { getUserInfo } from "zmp-sdk";
 import { PaginatedResponse  } from "@/types/pagination";
 import { FlashSaleSetting, FlashSaleSettingRes, Product, ProductParams } from "@/types/products";
+import deepEqual from "fast-deep-equal";
 
 export const userState = atom(() =>
   getUserInfo({
@@ -40,36 +41,47 @@ export const flashSaleSettingState = atom(async (get) => {
   );
   return res?.data;
 });
-export const productsState = atomFamily((body: ProductParams) =>
-  atom(async () => {
-    const defaultBody: ProductParams = {
-      limit: 21,
-      sort_by: "order",
-      sort_type: "ASC",
-      sell_on: ["Web Ecogreen"],
-      is_flash_sale: false,
-    };
-    const res = await requestWithFallback<PaginatedResponse<Product>>(
-      "/api/product/filter",
-      {
-        data: [],
-        paginate: {
-          total_data: 0,
-          total_page: 0,
-          page: 0,
-          limit: 0,
+export const productsState = atomFamily(
+  (body: ProductParams) =>
+    atom(async () => {
+      const defaultBody: ProductParams = {
+        limit: 21,
+        sort_by: "order",
+        sort_type: "ASC",
+        sell_on: ["Web Ecogreen"],
+        is_flash_sale: false,
+      };
+      const res = await requestWithFallback<PaginatedResponse<Product>>(
+        "/api/product/filter",
+        {
+          data: [],
+          paginate: {
+            total_data: 0,
+            total_page: 0,
+            page: 0,
+            limit: 0,
+          },
         },
-      },
-      {
-        method: "POST",
-        body: JSON.stringify({
-          ...defaultBody,
-          ...body,
-        }),
-      },
-    );
+        {
+          method: "POST",
+          body: JSON.stringify({
+            ...defaultBody,
+            ...body,
+          }),
+        },
+      );
 
-    return res.data;
-  }),
+      return res.data;
+    }),
+  deepEqual,
 );
 
+
+// export const searchResultState = atom(async (get) => {
+//   const keyword = get(keywordState);
+//   const products = await get(productsState);
+//   await new Promise((resolve) => setTimeout(resolve, 1000));
+//   return products.filter((product) =>
+//     product.name.toLowerCase().includes(keyword.toLowerCase())
+//   );
+// });

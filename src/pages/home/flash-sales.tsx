@@ -9,7 +9,6 @@ const params = {
 }
 export default function FlashSales() {
   const setting = useAtomValue(flashSaleSettingState);
-  console.log("🚀 ~ FlashSales ~ setting:", setting)
 
   const products = useAtomValue(productsState(params));
 

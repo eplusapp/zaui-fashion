@@ -4,30 +4,43 @@ import Section from "@/components/section";
 import { ProductItemSkeleton } from "@/components/skeleton";
 import { SearchIconLarge } from "@/components/vectors";
 import { useAtom, useAtomValue } from "jotai";
-import { Suspense, useEffect, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import {
   keywordState,
   recommendedProductsState,
-  searchResultState,
 } from "@/state";
+import { useNavigate } from "react-router-dom";
+import { bestSaleProductsState, productsState } from "@/request/product";
+import { Product } from "@/types/products";
+type Props = {
+  searchResult: Product[];
+};
 
-export function SearchResult() {
-  const searchResult = useAtomValue(searchResultState);
-
+export function SearchResult({
+  searchResult = [],
+}: Props) {
   return (
     <div className="w-full space-y-2 bg-section">
-      <Section title={`Kết quả (${searchResult.length})`}>
-        {searchResult.length ? (
-          <div className="py-2 px-4 grid grid-cols-2 gap-4">
+      <Section
+        title={`Kết quả (${searchResult.length})`}
+      >
+        {searchResult.length > 0 ? (
+          <div className="grid grid-cols-2 gap-4 px-4 py-2">
             {searchResult.map((product) => (
-              <ProductItem key={product.id} product={product} />
+              <ProductItem
+                key={product.id}
+                product={product}
+              />
             ))}
           </div>
         ) : (
           <EmptySearchResult />
         )}
       </Section>
-      {searchResult.length === 0 && <RecommendedProducts />}
+
+      {searchResult.length === 0 && (
+        <RecommendedProducts />
+      )}
     </div>
   );
 }
@@ -57,7 +70,7 @@ export function SearchResultSkeleton() {
 }
 
 export function RecommendedProducts() {
-  const recommendedProducts = useAtomValue(recommendedProductsState);
+  const recommendedProducts = useAtomValue(bestSaleProductsState);
 
   return (
     <Section title="Gợi ý sản phẩm">
@@ -88,7 +101,16 @@ export default function SearchPage() {
       setKeyword("");
     };
   }, []);
+  const navigate = useNavigate();
 
+  const params = useMemo(
+    () => ({
+      search: keyword,
+    }),
+    [keyword]
+  );
+
+  const products = useAtomValue(productsState(params));
   return (
     <>
       <div className="py-2">
@@ -106,7 +128,7 @@ export default function SearchPage() {
       </div>
       {keyword ? (
         <Suspense fallback={<SearchResultSkeleton />}>
-          <SearchResult />
+          <SearchResult searchResult={products} />
         </Suspense>
       ) : (
         <RecommendedProducts />

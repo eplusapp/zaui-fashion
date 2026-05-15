@@ -14,44 +14,52 @@ import Faz from "@/static/categories/faz.png";
 export default function Category() {
   const categories = [
     {
-      "id": 1,
+      "id": 'otiv',
       "name": "Giảm đau đầu\nmất ngủ",
-      "image": Otiv
+      "image": Otiv,
+      "filter": ['otiv'],
     },
     {
-      "id": 2,
+      "id": 'angela-gold',
       "name": "Sức khỏe & Sắc đẹp,\nsinh lý nữ",
-      "image": Angela
+      "image": Angela,
+      "filter": ["angela-gold"]
     },
     {
-      "id": 3,
+      "id": "qik-hair-for-men, qik-hair-for-women",
       "name": "Giảm rụng,\nmọc tóc",
-      "image": Qik
+      "image": Qik,
+      "filter": ["qik-hair-for-men", "qik-hair-for-women"]
     },
     {
-      "id": 4,
+      "id": 'ritana',
       "name": "Da căng sáng,\nmịn màng",
-      "image": Ritana
+      "image": Ritana,
+      "filter": ["ritana"]
     },
     {
-      "id": 5,
+      "id": 'hewel',
       "name": "Thải độc,\nbảo vệ gan",
-      "image": Hewel
+      "image": Hewel,
+      "filter": ["hewel"]
     },
     {
-      "id": 6,
+      "id": 'jex',
       "name": "Giảm đau,\nbảo vệ xương khớp",
-      "image": Jex
+      "image": Jex,
+      "filter": ["jex"]
     },
     {
-      "id": 7,
+      "id": 'wit',
       "name": "Bổ mắt",
-      "image": Wit
+      "image": Wit,
+      "filter": ["wit"]
     },
     {
-      "id": 8,
+      "id": 'faz',
       "name": "Điều hòa\nmỡ máu",
-      "image": Faz
+      "image": Faz,
+      "filter": ["faz"]
     }
   ]
 

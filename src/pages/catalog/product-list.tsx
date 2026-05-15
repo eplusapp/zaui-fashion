@@ -2,14 +2,29 @@ import ProductFilter from "./product-filter";
 import HorizontalDivider from "@/components/horizontal-divider";
 import ProductGrid from "@/components/product-grid";
 import { useAtomValue } from "jotai";
-import { productsState } from "@/state";
+import { productsState } from "@/request/product";
+import { useNavigate, useParams } from "react-router-dom";
+import { useMemo } from "react";
+import SearchBar from "@/components/search-bar";
 
 export default function ProductListPage() {
-  const products = useAtomValue(productsState);
+  const { id } = useParams();
+  const idList = id?.split(',')
+  const navigate = useNavigate();
+  
+  const params = useMemo(
+    () => ({
+      is_flash_sale: false,
+      sc: id ? idList : [],
+      sub_categories: id ? idList : [],
+    }),
+    [id]
+  );
 
+  const products = useAtomValue(productsState(params));
   return (
     <>
-      <ProductFilter />
+      <SearchBar onClick={() => navigate("/search")} />
       <HorizontalDivider />
       <ProductGrid products={products} className="pt-4 pb-[13px]" />
     </>
