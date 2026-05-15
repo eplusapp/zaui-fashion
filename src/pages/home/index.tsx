@@ -13,7 +13,9 @@ const HomePage: React.FunctionComponent = () => {
     <div className="min-h-full bg-section">
       <div className="bg-background pt-2">
         <SearchBar onClick={() => navigate("/search")} />
-        <Banners />
+        <div className="mt-4">
+          <Banners />
+        </div>
       </div>
       <div className="bg-background space-y-2 mt-2">
         <Category />

@@ -2,8 +2,8 @@ import { Product, SelectedOptions } from "@/types";
 
 export function getDefaultOptions(product: Product): SelectedOptions {
   return {
-    size: product.sizes?.[0],
-    color: product.colors?.[0].name,
+    size: product?.sizes?.[0],
+    color: product?.colors?.[0].name,
   };
 }
 

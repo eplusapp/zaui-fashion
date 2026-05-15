@@ -31,7 +31,7 @@ export default function ProductItem(props: ProductItemProps) {
         hover:shadow-md
         hover:-translate-y-1
       "
-      to={`/product/${props.product.id}`}
+      to={`/product/${props.product.slug}`}
       replace={props.replace}
       onClick={() => setSelected(true)}
     >

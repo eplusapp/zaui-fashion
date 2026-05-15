@@ -2,35 +2,27 @@ import Button from "@/components/button";
 import HorizontalDivider from "@/components/horizontal-divider";
 import { useAtomValue } from "jotai";
 import {
-  unstable_useViewTransitionState,
-  useLocation,
   useNavigate,
   useParams,
 } from "react-router-dom";
-import { productState } from "@/state";
 import { formatPrice } from "@/utils/format";
-import ShareButton from "./share-buttont";
-import VariantPicker from "./variant-picker";
-import { useEffect, useRef, useState } from "react";
-import Collapse from "@/components/collapse";
-import RelatedProducts from "./related-products";
+import { useEffect, useState } from "react";
 import { useAddToCart } from "@/hooks";
 import toast from "react-hot-toast";
 import { Color, Size } from "@/types";
+import { productDetailState } from "@/request/product";
+import Carousel from "@/components/carousel";
+import RelatedProducts from "./related-products";
 
 export default function ProductDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
-  const product = useAtomValue(productState(Number(id)))!;
+  const product = useAtomValue(productDetailState(String(id)))!;
   const [selectedColor, setSelectedColor] = useState<Color>();
   const [selectedSize, setSelectedSize] = useState<Size>();
 
-  useEffect(() => {
-    setSelectedColor(product.colors?.[0]);
-    setSelectedSize(product.sizes?.[0]);
-  }, [id]);
 
-  const { addToCart, setOptions } = useAddToCart(product);
+  const { addToCart, setOptions } = useAddToCart(product as any); //fix later
 
   useEffect(() => {
     setOptions({
@@ -42,73 +34,30 @@ export default function ProductDetailPage() {
   return (
     <div className="w-full h-full flex flex-col">
       <div className="flex-1 overflow-y-auto">
-        <div className="w-full px-4">
-          <div className="py-2">
-            <img
-              key={product.id}
-              src={product.image}
-              alt={product.name}
-              className="w-full h-full object-cover rounded-lg"
-              style={{
-                viewTransitionName: `product-image-${product.id}`,
-              }}
+        <div className="w-full px-4 pb-4">
+          <div className="py-2 pb-0">
+            <Carousel
+              slides={product.images?.map((banner) => (
+                <img className="w-full" src={banner.slug} />
+              ))}
+              previewImages={product.images.map(x => x.slug)}
             />
           </div>
-          <div className="text-xl font-medium text-primary">
-            {formatPrice(product.price)}
+          <div className="text-xl font-[700] text-primary">
+            {formatPrice(Number(product.discount_price || product.original_price))}
           </div>
-          {!!product.originalPrice && (
+          {!!product.original_price && (
             <div className="text-2xs text-subtitle line-through">
-              {formatPrice(product.price)}
+              {formatPrice(Number(product.original_price))}
             </div>
           )}
-          <div className="text-sm mt-1">{product.name}</div>
-          <div className="py-2">
-            <ShareButton product={product} />
-          </div>
-          {product.colors && (
-            <VariantPicker
-              title="Color"
-              variants={product.colors}
-              value={selectedColor}
-              onChange={(color) => setSelectedColor(color)}
-              renderVariant={(variant, selected) => (
-                <div
-                  className={"w-full h-full rounded-full ".concat(
-                    selected ? "border-2 border-primary p-0.5" : ""
-                  )}
-                >
-                  <div
-                    className="w-full h-full rounded-full"
-                    style={{ backgroundColor: variant?.hex }}
-                  />
-                </div>
-              )}
-            />
-          )}
-          <HorizontalDivider />
-          {product.sizes && (
-            <VariantPicker
-              title="Size"
-              variants={product.sizes}
-              value={selectedSize}
-              onChange={(size) => setSelectedSize(size)}
-              renderVariant={(variant, selected) => (
-                <div
-                  className={"w-full h-full flex justify-center items-center ".concat(
-                    selected ? "bg-primary text-white" : ""
-                  )}
-                >
-                  <div className="truncate">{variant}</div>
-                </div>
-              )}
-            />
-          )}
         </div>
-        {product.details && (
+        {product?.description && (
           <>
             <div className="bg-section h-2 w-full"></div>
-            <Collapse items={product.details} />
+            <div className="p-4">
+              <div dangerouslySetInnerHTML={{ __html: product?.description }} />
+            </div>
           </>
         )}
         <div className="bg-section h-2 w-full"></div>
@@ -116,7 +65,7 @@ export default function ProductDetailPage() {
           <div className="pt-2 pb-2.5">Sản phẩm khác</div>
           <HorizontalDivider />
         </div>
-        <RelatedProducts currentProductId={product.id} />
+        <RelatedProducts currentProductId={String(product?.id)} />
       </div>
 
       <HorizontalDivider />

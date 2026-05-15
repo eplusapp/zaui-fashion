@@ -75,13 +75,13 @@ export const productsState = atomFamily(
     }),
   deepEqual,
 );
-
-
-// export const searchResultState = atom(async (get) => {
-//   const keyword = get(keywordState);
-//   const products = await get(productsState);
-//   await new Promise((resolve) => setTimeout(resolve, 1000));
-//   return products.filter((product) =>
-//     product.name.toLowerCase().includes(keyword.toLowerCase())
-//   );
-// });
+export const productDetailState = atomFamily((id: string) =>
+  atom(async () => {
+    const res = await requestWithFallback<{
+      data?: Product;
+    }>(`/api/product/slug/${id}`, {
+      data: undefined,
+    });
+    return res.data;
+  }),
+);
