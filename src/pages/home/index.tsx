@@ -4,7 +4,6 @@ import SearchBar from "../../components/search-bar";
 import Category from "./category";
 import FlashSales from "./flash-sales";
 import HorizontalDivider from "@/components/horizontal-divider";
-import CategoryTabs from "@/components/category-tabs";
 import BestSales from "./best-sales";
 
 const HomePage: React.FunctionComponent = () => {

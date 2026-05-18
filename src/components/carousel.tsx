@@ -99,7 +99,7 @@ export default function Carousel({
           ))}
         </div>
       </div>
-      {previewImages && previewImages.length ? <div className="flex gap-2 overflow-x-auto py-4 scrollbar-hide">
+      {previewImages && previewImages.length ? <div className="flex gap-2 overflow-x-auto py-0 scrollbar-hide">
         {previewImages?.map((image, i) => (
           <button
             key={i}

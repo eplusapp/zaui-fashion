@@ -63,6 +63,11 @@ const router = createBrowserRouter(
           path: "/product/:id",
           element: <ProductDetailPage />,
           handle: {
+            title: ({ categories, params }) => {
+              const id = params.title || params.id
+              const title = id?.split('-')?.[0] || ''
+              return title?.toUpperCase()
+            },
             scrollRestoration: 0, // when user selects another product in related products, scroll to the top of the page
           },
         },

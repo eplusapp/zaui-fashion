@@ -13,6 +13,7 @@ import { Color, Size } from "@/types";
 import { productDetailState } from "@/request/product";
 import Carousel from "@/components/carousel";
 import RelatedProducts from "./related-products";
+import ProductSectionsRenderer from "@/components/product-detail-section";
 
 export default function ProductDetailPage() {
   const { id } = useParams();
@@ -21,7 +22,20 @@ export default function ProductDetailPage() {
   const [selectedColor, setSelectedColor] = useState<Color>();
   const [selectedSize, setSelectedSize] = useState<Size>();
 
+  const [tab, setTab] = useState<
+    'detail' | 'ingredients'
+  >('detail');
 
+  const tabs = [
+    {
+      key: 'detail',
+      label: 'Chi tiết sản phẩm',
+    },
+    {
+      key: 'ingredients',
+      label: 'Thành phần',
+    },
+  ];
   const { addToCart, setOptions } = useAddToCart(product as any); //fix later
 
   useEffect(() => {
@@ -30,7 +44,50 @@ export default function ProductDetailPage() {
       color: selectedColor?.name,
     });
   }, [selectedSize, selectedColor]);
-
+  const renderVariant = () => {
+    const listVariant = product?.sku_related?.filter(x => x.sell_on?.includes("Web Ecogreen") && x.brand !== "COMBO")
+    return <div className="flex gap-4 flex-wrap mt-4 mb-2">
+      {listVariant?.map(x => {
+        return <div className="border-[1px] border-black/15 px-4 rounded-[8px]">
+          {x.sku}
+        </div>
+      })}
+    </div>
+  }
+  const renderTab = () => {
+    return (
+      <div className="overflow-hidden  bg-white">
+        <div className=" flex overflow-x-auto bg-neutral-50">
+          {tabs.map(item => {
+            const selected = tab === item.key;
+            return (
+              <button
+                key={item.key}
+                onClick={() =>
+                  setTab(
+                    item.key as
+                    | 'detail'
+                    | 'ingredients',
+                  )
+                }
+                className={` relative min-w-fit px-5 py-4 text-sm font-semibold transition-all duration-200 
+                  ${selected ? ` bg-white text-primary` : `text-neutral-500` }`}
+              >
+                {item.label}
+                {selected && (
+                  <div className="  absolute  bottom-0  left-0  right-0  h-[2px]  bg-primary"/>
+                )}
+              </button>
+            );
+          })}
+        </div>
+        <div className="p-4">
+          {tab === 'detail' && <ProductSectionsRenderer data={product.product_detail} />}
+          {tab === 'ingredients' && <ProductSectionsRenderer data={product.product_detail} only={['ingredients']} />}
+        </div>
+      </div>
+    )
+  } 
   return (
     <div className="w-full h-full flex flex-col">
       <div className="flex-1 overflow-y-auto">
@@ -43,6 +100,7 @@ export default function ProductDetailPage() {
               previewImages={product.images.map(x => x.slug)}
             />
           </div>
+          {renderVariant()}
           <div className="text-xl font-[700] text-primary">
             {formatPrice(Number(product.discount_price || product.original_price))}
           </div>
@@ -61,6 +119,12 @@ export default function ProductDetailPage() {
           </>
         )}
         <div className="bg-section h-2 w-full"></div>
+        <div className="">
+          {renderTab()}
+          {/* <ProductSectionsRenderer data={product.product_detail} /> */}
+        </div>
+        <div className="bg-section h-2 w-full"></div>
+
         <div className="font-medium py-2 px-4">
           <div className="pt-2 pb-2.5">Sản phẩm khác</div>
           <HorizontalDivider />

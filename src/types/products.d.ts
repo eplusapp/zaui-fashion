@@ -36,61 +36,38 @@ export interface ProductDetail {
 
 export interface Product {
   id?: string;
-
   name: string;
   description: string;
-
   original_price: string | number;
   discount_price: number;
-
   is_flash_sale: boolean;
   flash_sale_price: number;
   flash_sale_sold_count: number;
   flash_sale_remaining_quantity: number;
-
   product_origin: string;
   product_gender: string;
-
   product_age_min: string;
   product_age_max: string;
-
   display: string;
-
   product_code: string;
   product_id: string;
-
   ingredient: string;
   benefit: string;
-
   brand: string;
-
   product_type: string;
-
   expired_date: string;
-
   sku: string;
   unit: string;
-
   created_at: string;
-
   product_detail: ProductDetail | string;
-
   tag: ProductTag[];
-
   images: ProductImage[];
-
   relateds: string;
-
   slug: string;
-
   order: string;
-
   quantity: number;
-
   sell_on: string[];
-
   weight: number;
-
   comboProducts: string[];
 }
 
@@ -119,5 +96,85 @@ export type FlashSaleSetting = {
 
 export type FlashSaleSettingRes = {
   data: FlashSaleSetting | undefined;
-
 };
+
+type ProductDetailItem = {
+  key?: string;
+  value?: string;
+  content?: string;
+};
+
+type ProductDetailSection = {
+  items: ProductDetailItem[];
+};
+
+type ProductResearchItem = {
+  title: string;
+  description: string;
+  imageUrl: string;
+};
+
+type ProductResearchSection = {
+  items: ProductResearchItem[];
+};
+
+type ProductVideo = {
+  youtube: string;
+};
+
+type ProductAdvantages = {
+  items: ProductDetailItem[];
+  coverUrl?: string;
+};
+
+export interface ProductDetailData {
+  ingredients?: ProductDetailSection;
+  specifications?: ProductDetailSection;
+  effects?: ProductDetailSection;
+  advantages?: ProductAdvantages;
+  features?: ProductDetailSection;
+  researches?: ProductResearchSection;
+  faqs?: ProductDetailSection;
+  video?: ProductVideo;
+}
+
+export interface ProductCategory {
+  id: string;
+  name: string;
+  slug?: string;
+  description?: string;
+}
+
+export interface ProductImage {
+  slug: string;
+  path: string;
+  size: string;
+  type: string;
+}
+
+export interface ProductTag {
+  id: string;
+  name: string;
+  description?: string;
+  slug?: string;
+}
+
+export interface ComboProduct {
+  id: string;
+  code: string;
+  name: string;
+  price: string | number;
+  quantity: number;
+  promotionName?: string;
+}
+
+export interface ProductDetail extends Product {
+  categories?: ProductCategory;
+  sub_categories?: ProductCategory;
+
+  sku_related?: Product[];
+
+  product_detail: ProductDetailData | string;
+
+  comboProducts?: ComboProduct[] | string;
+}

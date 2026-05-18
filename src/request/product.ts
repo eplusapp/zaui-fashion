@@ -4,7 +4,7 @@ import { Cart, Category, Color } from "@/types";
 import { requestWithFallback } from "@/utils/request";
 import { getUserInfo } from "zmp-sdk";
 import { PaginatedResponse  } from "@/types/pagination";
-import { FlashSaleSetting, FlashSaleSettingRes, Product, ProductParams } from "@/types/products";
+import { FlashSaleSetting, FlashSaleSettingRes, Product, ProductDetail, ProductParams } from "@/types/products";
 import deepEqual from "fast-deep-equal";
 
 export const userState = atom(() =>
@@ -78,7 +78,7 @@ export const productsState = atomFamily(
 export const productDetailState = atomFamily((id: string) =>
   atom(async () => {
     const res = await requestWithFallback<{
-      data?: Product;
+      data?: ProductDetail;
     }>(`/api/product/slug/${id}`, {
       data: undefined,
     });
