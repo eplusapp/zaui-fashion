@@ -80,21 +80,11 @@ const MetaTable = ({
                 return (
                     <Box
                         key={index}
-                        className="
-              border-b
-              border-neutral-200
-              last:border-none
-            "
+                        className="  border-b  border-neutral-200  last:border-none"
                     >
                         {!isSpecial && (
                             <Box
-                                className="
-                  bg-neutral-50
-                  px-4
-                  py-3
-                  text-sm
-                  font-semibold
-                "
+                                className="  bg-neutral-50  px-4  py-3  text-sm  font-semibold"
                                 dangerouslySetInnerHTML={{
                                     __html:
                                         item.key || '',
@@ -103,13 +93,7 @@ const MetaTable = ({
                         )}
 
                         <Box
-                            className="
-                px-4
-                py-3
-                text-sm
-                leading-6
-                text-neutral-700
-              "
+                            className="  px-4  py-3  text-sm  leading-6  text-neutral-700"
                             dangerouslySetInnerHTML={{
                                 __html:
                                     item.value || '',
@@ -182,7 +166,7 @@ export default function ProductSectionsRenderer({
     const faqs = data.faqs?.items ?? [];
 
     return (
-        <Box className="space-y-8 px-4 pb-8">
+        <Box className="space-y-8 pb-8">
             {only.includes('ingredients') && ingredients.length > 0 && (
                     <section>
                         <SectionTitle>
@@ -216,15 +200,7 @@ export default function ProductSectionsRenderer({
                                             className="relative pl-5 text-sm leading-6 "
                                         >
                                             <span
-                                                className="
-                          absolute
-                          left-0
-                          top-2
-                          h-2
-                          w-2
-                          rounded-full
-                          bg-white
-                        "
+                                                className="  absolute  left-0  top-2  h-2  w-2  rounded-full  bg-white"
                                             />
 
                                             <div
@@ -243,13 +219,7 @@ export default function ProductSectionsRenderer({
                         {mobileImage && (
                             <img
                                 src={mobileImage}
-                                className="
-                  mt-4
-                  hidden
-                  w-full
-                  rounded-3xl
-                  md:block
-                "
+                                className="  mt-4  hidden  w-full  rounded-3xl  md:block"
                             />
                         )}
                     </section>
@@ -264,49 +234,25 @@ export default function ProductSectionsRenderer({
                         </SectionTitle>
 
                         <Box
-                            className="
-                grid
-                grid-cols-1
-                gap-4
-              "
+                            className="  grid  grid-cols-1  gap-4"
                         >
                         {effects.map(
-                                (
-                                    item,
-                                    index,
-                                ) => (
+                                (item, index) => (
                                     <Box
                                         key={index}
-                                        className="
-                      flex
-                      items-start
-                      rounded-2xl
-                      border
-                      border-neutral-200
-                      bg-white
-                      p-4
-                    "
+                                        className="  flex  items-start  rounded-2xl  border  border-neutral-200  bg-white  p-4"
                                     >
                                         {item?.iconUrl && (
                                             <img
                                                 src={
                                                     item.iconUrl
                                                 }
-                                                className="
-                          mr-4
-                          h-10
-                          w-10
-                          object-contain
-                        "
+                                                className="  mr-4  h-10  w-10  object-contain"
                                             />
                                         )}
 
                                         <div
-                                            className="
-                        text-sm
-                        leading-6
-                        text-neutral-700
-                      "
+                                            className="  text-sm  leading-6  text-neutral-700"
                                             dangerouslySetInnerHTML={{
                                                 __html:
                                                     item.content ||
@@ -350,11 +296,7 @@ export default function ProductSectionsRenderer({
                         </SectionTitle>
 
                         <Box
-                            className="
-                grid
-                grid-cols-2
-                gap-4
-              "
+                            className="  grid  grid-cols-2  gap-4"
                         >
                             {features.map(
                                 (
@@ -363,36 +305,19 @@ export default function ProductSectionsRenderer({
                                 ) => (
                                     <Box
                                         key={index}
-                                        className="
-                      rounded-2xl
-                      border
-                      border-neutral-200
-                      bg-white
-                      p-4
-                      text-center
-                    "
+                                        className=" rounded-2xl border border-neutral-200 bg-white p-4 text-center"
                                     >
                                         {item?.iconUrl && (
                                             <img
                                                 src={
                                                     item?.iconUrl
                                                 }
-                                                className="
-                          mx-auto
-                          h-14
-                          w-14
-                          object-contain
-                        "
+                                                className="  mx-auto  h-14  w-14  object-contain"
                                             />
                                         )}
 
                                         <div
-                                            className="
-                        mt-4
-                        text-sm
-                        font-bold
-                        uppercase
-                      "
+                                            className="  mt-4  text-sm  font-bold  uppercase"
                                             dangerouslySetInnerHTML={{
                                                 __html:
                                                     item.key ||
@@ -401,12 +326,7 @@ export default function ProductSectionsRenderer({
                                         />
 
                                         <div
-                                            className="
-                        mt-2
-                        text-xs
-                        leading-5
-                        text-neutral-600
-                      "
+                                            className="  mt-2  text-xs  leading-5  text-neutral-600"
                                             dangerouslySetInnerHTML={{
                                                 __html:
                                                     item.value ||
@@ -442,36 +362,20 @@ export default function ProductSectionsRenderer({
                                     ) => (
                                         <div
                                             key={index}
-                                            className="
-                        min-w-[85%]
-                        rounded-3xl
-                        bg-white
-                        p-4
-                        shadow-sm
-                      "
+                                            className="  min-w-[85%]  rounded-3xl  bg-white  p-4  shadow-sm"
                                         >
                                             {item.imageUrl && (
                                                 <img
                                                     src={
                                                         item.imageUrl
                                                     }
-                                                    className="
-                            aspect-square
-                            w-full
-                            rounded-2xl
-                            border
-                            object-contain
-                          "
+                                                    className="  aspect-square  w-full  rounded-2xl  border  object-contain"
                                                 />
                                             )}
 
                                             <Box className="mt-4 flex gap-4">
                                                 <Text
-                                                    className="
-                            text-3xl
-                            font-bold
-                            text-neutral-300
-                          "
+                                                    className="  text-3xl  font-bold  text-neutral-300"
                                                 >
                                                     {String(
                                                         index +
@@ -484,10 +388,7 @@ export default function ProductSectionsRenderer({
 
                                                 <Box>
                                                     <div
-                                                        className="
-                              text-base
-                              font-bold
-                            "
+                                                        className="  text-base  font-bold"
                                                         dangerouslySetInnerHTML={{
                                                             __html:
                                                                 item.title ||
@@ -496,12 +397,7 @@ export default function ProductSectionsRenderer({
                                                     />
 
                                                     <div
-                                                        className="
-                              mt-2
-                              text-sm
-                              leading-6
-                              text-neutral-600
-                            "
+                                                        className="  mt-2  text-sm  leading-6  text-neutral-600"
                                                         dangerouslySetInnerHTML={{
                                                             __html:
                                                                 item.description ||
@@ -526,10 +422,7 @@ export default function ProductSectionsRenderer({
                         </SectionTitle>
 
                         <Box
-                            className="
-                overflow-hidden
-                rounded-3xl
-              "
+                            className="overflow-hidden rounded-3xl"
                         >
                             <div
                                 className="aspect-video"
@@ -563,24 +456,10 @@ export default function ProductSectionsRenderer({
                                     return (
                                         <Box
                                             key={index}
-                                            className="
-                        overflow-hidden
-                        rounded-2xl
-                        border
-                        border-blue-100
-                        bg-white
-                      "
+                                            className="  overflow-hidden  rounded-2xl  border  border-blue-100  bg-white"
                                         >
                                             <button
-                                                className="
-                          flex
-                          w-full
-                          items-center
-                          justify-between
-                          gap-4
-                          p-4
-                          text-left
-                        "
+                                                className="  flex  w-full  items-center  justify-between  gap-4  p-4  text-left"
                                                 onClick={() =>
                                                     setFaqOpen(
                                                         opened
@@ -596,15 +475,9 @@ export default function ProductSectionsRenderer({
                                                     />
 
                                                     <div
-                                                        className="
-                              text-sm
-                              font-bold
-                              uppercase
-                            "
+                                                        className="  text-sm  font-bold  uppercase"
                                                         dangerouslySetInnerHTML={{
-                                                            __html:
-                                                                item?.question ||
-                                                                '',
+                                                            __html: item?.question || '',
                                                         }}
                                                     />
                                                 </Box>
@@ -620,21 +493,10 @@ export default function ProductSectionsRenderer({
 
                                             {opened && (
                                                 <Box
-                                                    className="
-                            border-t
-                            border-blue-100
-                            p-4
-                          "
+                                                    className="  border-t  border-blue-100  p-4"
                                                 >
                                                     <Box
-                                                        className="
-                              mb-3
-                              flex
-                              items-center
-                              gap-2
-                              font-semibold
-                              text-blue-500
-                            "
+                                                        className="  mb-3  flex  items-center  gap-2  font-semibold  text-blue-500"
                                                     >
                                                         <Icon icon="zi-chat" />
                                                         <span>
@@ -643,15 +505,10 @@ export default function ProductSectionsRenderer({
                                                     </Box>
 
                                                     <div
-                                                        className="
-                              text-sm
-                              leading-6
-                              text-neutral-600
-                            "
+                                                        className="  text-sm  leading-6  text-neutral-600"
                                                         dangerouslySetInnerHTML={{
                                                             __html:
-                                                                item?.answer ||
-                                                                '',
+                                                                item?.answer || '',
                                                         }}
                                                     />
                                                 </Box>

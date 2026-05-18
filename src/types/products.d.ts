@@ -9,11 +9,6 @@ export interface ProductTag {
   [key: string]: unknown;
 }
 
-export interface ProductDetailItem {
-  key?: string;
-  value?: string;
-  content?: string;
-}
 
 export interface ProductDetailSection {
   items: ProductDetailItem[];
@@ -102,6 +97,9 @@ type ProductDetailItem = {
   key?: string;
   value?: string;
   content?: string;
+  question?: string;
+  answer?: string;
+  iconUrl?: string;
 };
 
 type ProductDetailSection = {
@@ -136,6 +134,7 @@ export interface ProductDetailData {
   researches?: ProductResearchSection;
   faqs?: ProductDetailSection;
   video?: ProductVideo;
+
 }
 
 export interface ProductCategory {
