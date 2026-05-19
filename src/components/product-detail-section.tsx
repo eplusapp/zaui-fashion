@@ -166,7 +166,7 @@ export default function ProductSectionsRenderer({
     const faqs = data.faqs?.items ?? [];
 
     return (
-        <Box className="space-y-8 pb-8">
+        <Box className="space-y-8 pb-2">
             {only.includes('ingredients') && ingredients.length > 0 && (
                     <section>
                         <SectionTitle>
@@ -195,14 +195,8 @@ export default function ProductSectionsRenderer({
                             </SectionTitle>
                             <ul className="space-y-3">
                             {advantages.map((item,index) => (
-                                        <li
-                                            key={index}
-                                            className="relative pl-5 text-sm leading-6 "
-                                        >
-                                            <span
-                                                className="  absolute  left-0  top-2  h-2  w-2  rounded-full  bg-white"
-                                            />
-
+                                        <li key={index} className="relative pl-5 text-sm leading-6 " >
+                                            <span className="  absolute  left-0  top-2  h-2  w-2  rounded-full  bg-white"/>
                                             <div
                                                 dangerouslySetInnerHTML={{
                                                     __html:
@@ -352,7 +346,7 @@ export default function ProductSectionsRenderer({
 
                         <div
                             ref={researchRef}
-                            className="overflow-hidden"
+                            className="overflow-hidde -"
                         >
                             <div className="flex gap-4">
                                 {researches.map(
@@ -362,7 +356,7 @@ export default function ProductSectionsRenderer({
                                     ) => (
                                         <div
                                             key={index}
-                                            className="  min-w-[85%]  rounded-3xl  bg-white  p-4  shadow-sm"
+                                            className="  min-w-[100%]  rounded-3xl  bg-white  p-4  shadow-sm"
                                         >
                                             {item.imageUrl && (
                                                 <img

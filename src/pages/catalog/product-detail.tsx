@@ -6,21 +6,20 @@ import {
   useParams,
 } from "react-router-dom";
 import { formatPrice } from "@/utils/format";
-import { useEffect, useState } from "react";
-import { useAddToCart } from "@/hooks";
+import { useState } from "react";
 import toast from "react-hot-toast";
-import { Color, Size } from "@/types";
 import { productDetailState } from "@/request/product";
 import Carousel from "@/components/carousel";
 import RelatedProducts from "./related-products";
 import ProductSectionsRenderer from "@/components/product-detail-section";
+import { Product } from "@/types/products";
+import { useCart } from "@/hook/userAddToCart";
 
 export default function ProductDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const product = useAtomValue(productDetailState(String(id)))!;
-  const [selectedColor, setSelectedColor] = useState<Color>();
-  const [selectedSize, setSelectedSize] = useState<Size>();
+  const [selectedProduct, setSelectedProduct] = useState<Product>();
 
   const [tab, setTab] = useState<
     'detail' | 'ingredients'
@@ -36,19 +35,19 @@ export default function ProductDetailPage() {
       label: 'Thành phần',
     },
   ];
-  const { addToCart, setOptions } = useAddToCart(product as any); //fix later
+  const { addToCart } = useCart(); //fix later
 
-  useEffect(() => {
-    setOptions({
-      size: selectedSize,
-      color: selectedColor?.name,
-    });
-  }, [selectedSize, selectedColor]);
   const renderVariant = () => {
     const listVariant = product?.sku_related?.filter(x => x.sell_on?.includes("Web Ecogreen") && x.brand !== "COMBO")
-    return <div className="flex gap-4 flex-wrap mt-4 mb-2">
+    return <div className={`flex gap-4 flex-wrap mt-4 mb-2`}>
       {listVariant?.map(x => {
-        return <div className="border-[1px] border-black/15 px-4 rounded-[8px]">
+        const isSelected = x.id === selectedProduct?.id
+        return <div onClick={() => setSelectedProduct(x)} className={`
+          border-[1px] border-black/15 px-4 rounded-[8px] min-w-[100px] text-center
+          ${isSelected
+            ? `border-primary-eco-blue text-primary-eco-blue font-semibold `
+            : ` border-black/15 text-black `
+        } `}>
           {x.sku}
         </div>
       })}
@@ -137,7 +136,11 @@ export default function ProductDetailPage() {
         <Button
           large
           onClick={() => {
-            addToCart(1);
+            if(!selectedProduct) {
+              toast.error("Vui lòng chọn loại sản phẩm");
+              return;
+            }
+            addToCart(selectedProduct as Product, 1);
             toast.success("Đã thêm vào giỏ hàng");
           }}
         >
@@ -147,7 +150,10 @@ export default function ProductDetailPage() {
           large
           primary
           onClick={() => {
-            addToCart(1);
+            if(!selectedProduct) {
+              toast.error("Vui lòng chọn loại sản phẩm");
+              return;
+            }
             navigate("/cart");
           }}
         >

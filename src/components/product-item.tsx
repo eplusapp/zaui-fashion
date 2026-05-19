@@ -3,6 +3,7 @@ import { formatPrice } from "@/utils/format";
 import TransitionLink from "./transition-link";
 import { useState } from "react";
 import IcPlus from "@/static/icon/plus.png";
+import { useCart } from "@/hook/userAddToCart";
 
 export interface ProductItemProps {
   product: Product;
@@ -16,6 +17,7 @@ export interface ProductItemProps {
 export default function ProductItem(props: ProductItemProps) {
   const [selected, setSelected] = useState(false);
   const image = props.product.images?.find(x => x.type === 'thumbnail')
+  const { addToCart } = useCart()
   return (
     <TransitionLink
       className="
@@ -64,7 +66,13 @@ export default function ProductItem(props: ProductItemProps) {
                   {formatPrice(Number(props.product.discount_price))}
                 </div>
               </div>
-              <img className="" src={IcPlus}/>
+              <div onClick={e => {
+                e.preventDefault();
+                e.stopPropagation();
+                addToCart(props.product)
+              }}>
+                <img className="w-7 h-7" src={IcPlus} />
+              </div>
             </div>
           </div>
         </>
