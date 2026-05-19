@@ -45,7 +45,7 @@ export const productsState = atomFamily(
   (body: ProductParams) =>
     atom(async () => {
       const defaultBody: ProductParams = {
-        limit: 21,
+        limit: 9999,
         sort_by: "order",
         sort_type: "ASC",
         sell_on: ["Web Ecogreen"],

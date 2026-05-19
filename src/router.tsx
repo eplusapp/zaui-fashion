@@ -8,6 +8,8 @@ import ProfilePage from "@/pages/profile";
 import SearchPage from "@/pages/search";
 import { createBrowserRouter } from "react-router-dom";
 import { getBasePath } from "@/utils/zma";
+import OrderPage from "./pages/order";
+import CheckoutPage from "./pages/checkout";
 
 const router = createBrowserRouter(
   [
@@ -42,6 +44,20 @@ const router = createBrowserRouter(
           element: <ProfilePage />,
           handle: {
             logo: true,
+          },
+        },
+        {
+          path: "/orders",
+          element: <OrderPage />,
+          handle: {
+            title: "Đơn hàng",
+          },
+        },
+        {
+          path: "/check-out",
+          element: <CheckoutPage />,
+          handle: {
+            title: "Thanh toán",
           },
         },
         {

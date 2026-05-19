@@ -1,4 +1,4 @@
-import { CartIcon, CategoryIcon, HomeIcon, ProfileIcon } from "./vectors";
+import { CartIcon, CategoryIcon, HomeIcon, OrderHistoryIcon, OrderIcon, ProfileIcon } from "./vectors";
 import HorizontalDivider from "./horizontal-divider";
 import { useAtomValue } from "jotai";
 import { cartState } from "@/state";
@@ -12,10 +12,15 @@ const NAV_ITEMS = [
     path: "/",
     icon: HomeIcon,
   },
+  // {
+  //   name: "Danh mục",
+  //   path: "/categories",
+  //   icon: CategoryIcon,
+  // },
   {
-    name: "Danh mục",
-    path: "/categories",
-    icon: CategoryIcon,
+    name: "Đơn hàng",
+    path: "/orders",
+    icon: OrderIcon,
   },
   {
     name: "Giỏ hàng",
@@ -34,12 +39,7 @@ const NAV_ITEMS = [
         </div>
       );
     },
-  },
-  // {
-  //   name: "Thành viên",
-  //   path: "/profile",
-  //   icon: ProfileIcon,
-  // },
+  }
 ];
 
 export default function Footer() {
@@ -56,10 +56,9 @@ export default function Footer() {
       >
         {NAV_ITEMS.map((item) => {
           if(item.path === '/cart') {
-            return <div className="cursor-pointer flex-[2] bg-[#EAECF5] rounded flex gap-1 pl-1">
+            return <div key={item.path} className="cursor-pointer flex-[2] bg-[#EAECF5] rounded flex gap-1 pl-1">
               <TransitionLink
                 to={item.path}
-                key={item.path}
                 className="flex flex-[1] flex-col items-center space-y-0.5 p-1 pb-0.5 cursor-pointer active:scale-105 align-center"
               >
                 {({ isActive }) => (
@@ -73,14 +72,14 @@ export default function Footer() {
                   </>
                 )}
               </TransitionLink>
-              <div className="flex-[2] bg-primary-eco-blue rounded flex flex-col items-center">
+              <TransitionLink to="/check-out" className="flex-[2] bg-primary-eco-blue rounded flex flex-col items-center">
                 <div className="text-white font-[700]">
                   {formatPrice(totalPrice)}
                 </div>
                 <div className="text-white font-[500]">
                   Đặt mua
                 </div>
-              </div>
+              </TransitionLink>
             </div>
           }
           return (
