@@ -30,7 +30,6 @@ export const categoriesStateUpwrapped = unwrap(
 );
 
 export const productsState = atom(async (get) => {
-  const categories = await get(categoriesState);
   const res = await requestWithFallback<
     (PaginatedResponse<Product>)
   >("/api/product/best-seller", {

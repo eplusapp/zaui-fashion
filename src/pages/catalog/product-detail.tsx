@@ -14,6 +14,7 @@ import RelatedProducts from "./related-products";
 import ProductSectionsRenderer from "@/components/product-detail-section";
 import { Product } from "@/types/products";
 import { useCart } from "@/hook/userAddToCart";
+import ProductComboSection from "@/components/product-combo-section";
 
 export default function ProductDetailPage() {
   const { id } = useParams();
@@ -39,6 +40,9 @@ export default function ProductDetailPage() {
 
   const renderVariant = () => {
     const listVariant = product?.sku_related?.filter(x => x.sell_on?.includes("Web Ecogreen") && x.brand !== "COMBO")
+    if (product.brand === "COMBO") {
+      return null;
+    }
     return <div className={`flex gap-4 flex-wrap mt-4 mb-2`}>
       {listVariant?.map(x => {
         const isSelected = x.id === selectedProduct?.id
@@ -54,6 +58,9 @@ export default function ProductDetailPage() {
     </div>
   }
   const renderTab = () => {
+    if (product.brand === "COMBO") {
+      return <ProductComboSection record={product} />
+    }
     return (
       <div className="overflow-hidden  bg-white">
         <div className=" flex overflow-x-auto bg-neutral-50">
@@ -93,18 +100,18 @@ export default function ProductDetailPage() {
         <div className="w-full px-4 pb-4">
           <div className="py-2 pb-0">
             <Carousel
-              slides={product.images?.map((banner) => (
+              slides={product?.images?.map((banner) => (
                 <img className="w-full" src={banner.slug} />
               ))}
-              previewImages={product.images.map(x => x.slug)}
+              previewImages={product?.images?.map(x => x.slug)}
             />
           </div>
           {renderVariant()}
-          <div className="text-xl font-[700] text-primary">
+          <div className="text-[24px] font-[700] text-primary">
             {formatPrice(Number(product.discount_price || product.original_price))}
           </div>
           {!!product.original_price && (
-            <div className="text-2xs text-subtitle line-through">
+            <div className="text-[18px] text-subtitle line-through">
               {formatPrice(Number(product.original_price))}
             </div>
           )}
@@ -120,7 +127,6 @@ export default function ProductDetailPage() {
         <div className="bg-section h-2 w-full"></div>
         <div className="">
           {renderTab()}
-          {/* <ProductSectionsRenderer data={product.product_detail} /> */}
         </div>
         <div className="bg-section h-2 w-full"></div>
 

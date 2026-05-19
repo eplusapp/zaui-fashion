@@ -92,7 +92,7 @@ export default function Carousel({
           {slides.map((slide, i) => (
             <div
               key={i}
-              className="flex-none basis-full"
+              className="flex-none basis-full flex items-center justify-center"
             >
               {slide}
             </div>

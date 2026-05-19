@@ -188,7 +188,7 @@ export default function CheckoutPage() {
                 Thanh toán
               </div>
               <div className="font-[900] text-xl">
-                {formatPrice(totalPrice)}
+                {formatPrice(totalPrice + 10000)}
               </div>
             </div>
           </div>

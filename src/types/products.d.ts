@@ -9,62 +9,11 @@ export interface ProductTag {
   [key: string]: unknown;
 }
 
-
 export interface ProductDetailSection {
   items: ProductDetailItem[];
   coverUrl?: string;
 }
 
-export interface ProductDetail {
-  ingredients: ProductDetailSection;
-  specifications: ProductDetailSection;
-  effects: ProductDetailSection;
-  advantages: ProductDetailSection;
-  features: ProductDetailSection;
-  researches: ProductDetailSection;
-  faqs: ProductDetailSection;
-
-  video: {
-    youtube: string;
-  };
-}
-
-export interface Product {
-  id?: string;
-  name: string;
-  description: string;
-  original_price: string | number;
-  discount_price: number;
-  is_flash_sale: boolean;
-  flash_sale_price: number;
-  flash_sale_sold_count: number;
-  flash_sale_remaining_quantity: number;
-  product_origin: string;
-  product_gender: string;
-  product_age_min: string;
-  product_age_max: string;
-  display: string;
-  product_code: string;
-  product_id: string;
-  ingredient: string;
-  benefit: string;
-  brand: string;
-  product_type: string;
-  expired_date: string;
-  sku: string;
-  unit: string;
-  created_at: string;
-  product_detail: ProductDetail | string;
-  tag: ProductTag[];
-  images: ProductImage[];
-  relateds: string;
-  slug: string;
-  order: string;
-  quantity: number;
-  sell_on: string[];
-  weight: number;
-  comboProducts: string[];
-}
 
 type ProductParams = {
   limit?: number;
@@ -134,7 +83,6 @@ export interface ProductDetailData {
   researches?: ProductResearchSection;
   faqs?: ProductDetailSection;
   video?: ProductVideo;
-
 }
 
 export interface ProductCategory {
@@ -160,10 +108,17 @@ export interface ProductTag {
 
 export interface ComboProduct {
   id: string;
-  code: string;
+  slug: string;
   name: string;
   price: string | number;
   quantity: number;
+  image: string;
+  effects: {
+    items: {
+      iconUrl: string;
+      content: string;
+    }[];
+  };
   promotionName?: string;
 }
 
@@ -176,4 +131,40 @@ export interface ProductDetail extends Product {
   product_detail: ProductDetailData | string;
 
   comboProducts?: ComboProduct[] | string;
+}
+export interface Product {
+  id?: string;
+  name: string;
+  description: string;
+  original_price: string | number;
+  discount_price: number;
+  is_flash_sale: boolean;
+  flash_sale_price: number;
+  flash_sale_sold_count: number;
+  flash_sale_remaining_quantity: number;
+  product_origin: string;
+  product_gender: string;
+  product_age_min: string;
+  product_age_max: string;
+  display: string;
+  product_code: string;
+  product_id: string;
+  ingredient: string;
+  benefit: string;
+  brand: string;
+  product_type: string;
+  expired_date: string;
+  sku: string;
+  unit: string;
+  created_at: string;
+  product_detail: ProductDetailData | string;
+  tag: ProductTag[];
+  images: ProductImage[];
+  relateds: string;
+  slug: string;
+  order: string;
+  quantity: number;
+  sell_on: string[];
+  weight: number;
+  comboProducts: string[];
 }
