@@ -3,7 +3,7 @@ import { formatPrice } from "@/utils/format";
 import TransitionLink from "./transition-link";
 import { useState } from "react";
 import IcPlus from "@/static/icon/plus.png";
-import { useCart } from "@/hook/userAddToCart";
+import { useCart } from "@/hook/useCart";
 
 export interface ProductItemProps {
   product: Product;

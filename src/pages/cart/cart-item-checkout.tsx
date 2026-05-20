@@ -9,7 +9,7 @@ import { RemoveIcon } from "@/components/vectors";
 import { useAtom } from "jotai";
 import { selectedCartItemIdsState } from "@/state";
 import { useEffect, useMemo, useState } from "react";
-import { useCart } from "@/hook/userAddToCart";
+import { useCart } from "@/hook/useCart";
 
 const SWIPE_TO_DELTE_OFFSET = 80;
 

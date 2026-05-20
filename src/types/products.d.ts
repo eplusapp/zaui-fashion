@@ -166,5 +166,4 @@ export interface Product {
   quantity: number;
   sell_on: string[];
   weight: number;
-  comboProducts: string[];
 }

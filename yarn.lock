@@ -2621,7 +2621,7 @@ yargs@^16.0.0:
     y18n "^5.0.5"
     yargs-parser "^20.2.2"
 
-zmp-sdk@^2.41.0:
+zmp-sdk@^2.51.1:
   version "2.51.1"
   resolved "https://registry.yarnpkg.com/zmp-sdk/-/zmp-sdk-2.51.1.tgz#0169bcce3aa589ac586b7c86505ed284f8b97b1a"
   integrity sha512-E5EKWkG49J35BpFILDevCjBECEnQLJoUO3oiKLMPs7hH8oysOfRIt5i4nHAVI55uOuELnErNq0KwTaGHVXiz5g==
@@ -2634,7 +2634,7 @@ zmp-sdk@^2.41.0:
     qrcode "^1.4.4"
     raven-js "^3.27.2"
 
-zmp-ui@^1.11.5:
+zmp-ui@^1.11.14:
   version "1.11.14"
   resolved "https://registry.yarnpkg.com/zmp-ui/-/zmp-ui-1.11.14.tgz#cb6c46aab2cf9623f1a2015f8bd1e4a259451d22"
   integrity sha512-BN2YjNfxyjeXSABOkB04eU7wN2iOA4CRQGuX2a5fGGRCtMyNngiYhCv6n0CyNaviSoZj0htowccDNXr4zWUcCg==

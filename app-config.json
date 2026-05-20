@@ -15,6 +15,8 @@
   "template": {
     "name": "zaui-fashion",
     "apiUrl": "https://ecogreen.com.vn",
+    "ecoUrl": "https://eco-app-api.e-plus.vn",
+    "x-apikey": "686ff9e204d34qsk581f548c0c0268fh",
     "oaIDtoOpenChat": "4318657068771012646"
   }
 }

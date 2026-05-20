@@ -1,7 +1,7 @@
 import { useAtomValue } from "jotai";
 import { cartState } from "@/state";
 import CartItem from "./cart-item";
-import { useCart } from "@/hook/userAddToCart";
+import { useCart } from "@/hook/useCart";
 
 export default function CartList() {
   const { items } = useCart();

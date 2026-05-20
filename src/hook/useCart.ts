@@ -4,10 +4,11 @@ import { useCallback, useMemo } from "react";
 import { Product } from "@/types/products";
 import { CartItem } from "@/types/cart";
 
-import { cartState } from "@/request/cart";
+import { buyNowState, cartState } from "@/request/cart";
 
 export function useCart() {
   const [cart, setCart] = useAtom(cartState);
+  const [buyNowItem, setBuyNowItem] = useAtom(buyNowState);
 
   const calculateCart = useCallback((items: CartItem[]) => {
     const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
@@ -51,12 +52,27 @@ export function useCart() {
     [setCart, calculateCart],
   );
 
+  const buyNow = useCallback(
+    (product: Product, quantity: number = 1) => {
+      setBuyNowItem({
+        id: `buy-now-${Date.now()}`,
+        product,
+        quantity,
+      });
+    },
+    [setBuyNowItem],
+  );
+
   const removeFromCart = useCallback(
     (cartItemId: string) => {
-      setCart((prev) => {
-        const items = prev.items.filter((item) => item.id !== cartItemId);
-        return calculateCart(items);
-      });
+      if (cartItemId?.includes('buy-now')) {
+        clearBuyNow()
+      } else {
+        setCart((prev) => {
+          const items = prev.items.filter((item) => item.id !== cartItemId);
+          return calculateCart(items);
+        });
+      }
     },
     [setCart, calculateCart],
   );
@@ -130,13 +146,39 @@ export function useCart() {
     });
   }, [setCart]);
 
+  const clearBuyNow = useCallback(() => {
+    setBuyNowItem(null);
+  }, [setBuyNowItem]);
+
+  const checkoutItems = useMemo(() => {
+    if (buyNowItem) {
+      return [buyNowItem];
+    }
+
+    return cart.items;
+  }, [buyNowItem, cart.items]);
+
+  const checkoutTotalPrice = useMemo(() => {
+    return checkoutItems.reduce((sum, item) => {
+      const price = item.product.discount_price || item.product.original_price;
+
+      return sum + Number(price) * item.quantity;
+    }, 0);
+  }, [checkoutItems]);
+
+  const checkoutTotalQuantity = useMemo(() => {
+    return checkoutItems.reduce((sum, item) => sum + item.quantity, 0);
+  }, [checkoutItems]);
+
   return {
     cart,
 
-    items: cart.items,
-    totalPrice: cart.totalPrice,
-    totalQuantity: cart.totalQuantity,
+    items: checkoutItems,
+    totalPrice: checkoutTotalPrice,
+    totalQuantity: checkoutTotalQuantity,
 
+    clearBuyNow,
+    buyNow,
     addToCart,
     removeFromCart,
 

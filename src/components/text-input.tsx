@@ -16,7 +16,7 @@ export default function TextInput(props: TextInputProps) {
       </div>}
      
       <input
-        className="px-2 text-base border-2 border-gray-100 focus:border-gray-500 rounded outline-none py-2"
+        className="h-12 px-2 text-base border-2 border-gray-100 focus:border-gray-500 rounded outline-none py-2"
         value={props.value}
         type="text"
         inputMode="text"

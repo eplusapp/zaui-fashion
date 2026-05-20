@@ -9,7 +9,7 @@ import { RemoveIcon } from "@/components/vectors";
 import { useAtom } from "jotai";
 import { selectedCartItemIdsState } from "@/state";
 import { useEffect, useMemo, useState } from "react";
-import { useCart } from "@/hook/userAddToCart";
+import { useCart } from "@/hook/useCart";
 
 const SWIPE_TO_DELTE_OFFSET = 80;
 
@@ -17,41 +17,8 @@ export default function CartItem(props: CartItemProps) {
   const { addToCart, updateQuantity, removeFromCart } = useCart();
 
 
-  // swipe left to delete animation
-  // const [{ x }, api] = useSpring(() => ({ x: 0 }));
-  // const bind = useDrag(
-  //   ({ last, offset: [ox] }) => {
-  //     if (last) {
-  //       if (ox < -SWIPE_TO_DELTE_OFFSET) {
-  //         api.start({ x: -SWIPE_TO_DELTE_OFFSET });
-  //       } else {
-  //         api.start({ x: 0 });
-  //       }
-  //     } else {
-  //       api.start({ x: Math.min(ox, 0), immediate: true });
-  //     }
-  //   },
-  //   {
-  //     from: () => [x.get(), 0],
-  //     axis: "x",
-  //     bounds: { left: -100, right: 0, top: 0, bottom: 0 },
-  //     rubberband: true,
-  //     preventScroll: true,
-  //   }
-  // );
-
   return (
     <div className="relative">
-      {/* <div className="absolute right-0 top-0 bottom-0 w-20 border-t-[0.5px] border-b-[0.5px] border-black/10">
-        <div
-          className="bg-danger text-white/95 w-full h-full flex flex-col space-y-1 justify-center items-center cursor-pointer"
-          onClick={() => addToCart(props.product)}
-        >
-          <RemoveIcon />
-          <div className="text-2xs font-medium">Xoá</div>
-        </div>
-      </div> */}
-
       <div
         // {...bind()}
         // style={{ x }}

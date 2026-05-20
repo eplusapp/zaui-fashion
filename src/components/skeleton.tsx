@@ -19,28 +19,16 @@ export function PageSkeleton() {
         />
       </div>
       <div className="bg-background space-y-2 mt-2">
-        <Tabs
-          items={[1, 2, 3, 4]}
-          value={undefined}
-          onChange={() => {}}
-          renderLabel={(key) => (
-            <div
-              key={key}
-              className="h-6 w-10 rounded-lg bg-skeleton animate-pulse"
-            />
-          )}
-        />
-
         <Section
           title={
             <div className="h-[18px] w-36 rounded-lg bg-skeleton animate-pulse" />
           }
         >
-          <div className="pt-2.5 pb-4 flex space-x-6 overflow-x-auto px-4">
-            {[1, 2, 3, 4].map((key) => (
+          <div className="pt-2.5 pb-4 grid grid-cols-4 gap-y-6 gap-x-4 px-4">
+            {[1, 2, 3, 4, 5, 6, 7, 8].map((key) => (
               <div
                 key={key}
-                className="flex flex-col items-center space-y-2 flex-none basis-[70px] overflow-hidden cursor-pointer"
+                className="flex  flex-col items-center space-y-2 flex-none basis-[70px] overflow-hidden cursor-pointer"
               >
                 <div className="w-[70px] h-[70px] object-cover rounded-full border-[0.5px] border-black/15 bg-skeleton animate-pulse" />
                 <div className="w-full h-9">

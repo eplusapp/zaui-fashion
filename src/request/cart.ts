@@ -1,4 +1,4 @@
-import { Cart } from "@/types/cart";
+import { Cart, CartItem } from "@/types/cart";
 import { atomWithStorage } from "jotai/utils";
 import { nativeStorage } from "zmp-sdk/apis";
 
@@ -42,8 +42,7 @@ export const cartState = atomWithStorage<Cart>(
   {
     getItem: (key, initialValue) => {
       const value = zaloStorage.getItem(key);
-
-      return value || initialValue;
+      return value !== null ? value : initialValue;
     },
 
     setItem: (key, value) => {
@@ -55,3 +54,5 @@ export const cartState = atomWithStorage<Cart>(
     },
   },
 );
+
+export const buyNowState = atomWithStorage<CartItem | null>("buy-now", null);

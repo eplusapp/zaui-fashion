@@ -13,7 +13,6 @@ export const userState = atom(() =>
   })
 );
 
-export const selectedTabIndexState = atom(0);
 
 export const bestProductsState = atom(async (get) => {
   // const categories = await get(categoriesState);

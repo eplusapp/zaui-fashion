@@ -96,19 +96,13 @@ const ProductComboSection = memo(
                                     </div>
 
                                     <div className="flex-1 w-full">
-                                        <div
-                                            className="  text-[18px]  font-[800]  text-[#323232]"
-                                        >
+                                        <div className="  text-[18px]  font-[800]  text-[#323232]" >
                                             {item.name}
                                         </div>
-                                        <div
-                                            className="  mt-2  text-[18px]  font-[700]  text-[#1E266E]"
-                                        >
+                                        {item.price ? <div className="  mt-2  text-[18px]  font-[700]  text-[#1E266E]" >
                                             {formatPrice(Number(item.price))}
-                                        </div>
-                                        <div
-                                            className="  mt-2"
-                                        >
+                                        </div> : <></>}
+                                        <div className="  mt-2" >
                                             {item.effects?.items?.map((x, index) => (
                                                 <div className="text-md  leading-6  text-[#475467] flex gap-1" key={index}>
                                                     <div className=" mt-2 h-1.5 w-1.5 min-w-1.5 rounded-full bg-[#475467]"                                                    />

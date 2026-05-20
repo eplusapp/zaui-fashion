@@ -6,7 +6,7 @@ import { useAtomValue } from "jotai";
 import { cartState } from "@/state";
 import { EmptyBoxIcon } from "@/components/vectors";
 import SelectAll from "./select-all";
-import { useCart } from "@/hook/userAddToCart";
+import { useCart } from "@/hook/useCart";
 
 export default function CartPage() {
   const { items } = useCart();

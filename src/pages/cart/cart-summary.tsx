@@ -4,7 +4,7 @@ import { useCheckout, useCustomerSupport } from "@/hooks";
 import { useAtomValue } from "jotai";
 import { cartTotalState } from "@/state";
 import { formatPrice } from "@/utils/format";
-import { useCart } from "@/hook/userAddToCart";
+import { useCart } from "@/hook/useCart";
 import HorizontalDivider from "@/components/horizontal-divider";
 import { useNavigate } from "react-router-dom";
 

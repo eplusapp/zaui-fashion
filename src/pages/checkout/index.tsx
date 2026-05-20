@@ -1,8 +1,8 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Product } from "@/types/products";
 import CollapseView from "@/components/collapse-view";
 import HorizontalDivider from "@/components/horizontal-divider";
-import { useCart } from "@/hook/userAddToCart";
+import { useCart } from "@/hook/useCart";
 import CartItemCheckout from "../cart/cart-item-checkout";
 import TextInput from "@/components/text-input";
 import TextArea from "@/components/text-area";
@@ -10,15 +10,25 @@ import Checkbox from "@/components/checkbox";
 import { Radio } from "zmp-ui";
 import Button from "@/components/button";
 import { formatPrice } from "@/utils/format";
+import { useAtomValue } from "jotai";
+import { provincesState } from "@/request/locations";
+import DemoPage from "@/components/modals/checkout-location";
+import CheckoutLocation from "@/components/modals/checkout-location";
 type Props = {
   searchResult: Product[];
 };
 
 export default function CheckoutPage() {
-  const { items, totalPrice } = useCart();
+  const { items, totalPrice, clearBuyNow } = useCart();
+  
   const [enableReciver, setEnableReciver] = useState(false)
-  const [recive, setRecive] = useState('1')
-
+  const [recive, setRecive] = useState<'customer' | 'eco'>()
+  useEffect(() => {
+    return () => {
+      clearBuyNow()
+    }
+  }, [])
+  
   const [buyerForm, setBuyerForm] = useState({
     name: "",
     phone: "",
@@ -71,24 +81,7 @@ export default function CheckoutPage() {
       <CollapseView
         title="Hình thức giao hàng"
       >
-        <div className="w-full my-4">
-          <Radio.Group
-            onChange={(x) => {
-              setRecive(String(x))
-            }}
-            defaultValue="1"
-            options={[
-              {
-                label: 'Giao hàng tận nơi',
-                value: '1'
-              },
-              {
-                label: 'Nhận tại Công ty Dược phẩm Eco',
-                value: '2'
-              }
-            ]}
-          />
-        </div>
+        <CheckoutLocation setRecive={setRecive} recive={recive} />
       </CollapseView>
       <HorizontalDivider />
       <CollapseView
@@ -101,7 +94,7 @@ export default function CheckoutPage() {
           <Radio.Group
             className="mt-2 flex flex-col gap-2"
             onChange={(x) => {
-              setRecive(String(x))
+              // setRecive(String(x))
             }}
             defaultValue="1"
             options={[
@@ -177,7 +170,7 @@ export default function CheckoutPage() {
                     value=""
                     onChange={() => { }}
                   />
-                  <Button className="w-[150px]" primary>
+                  <Button className="w-[150px] text-[12px]" primary>
                     Áp dụng
                   </Button>
                 </div>

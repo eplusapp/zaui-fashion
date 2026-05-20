@@ -13,14 +13,16 @@ import Carousel from "@/components/carousel";
 import RelatedProducts from "./related-products";
 import ProductSectionsRenderer from "@/components/product-detail-section";
 import { Product } from "@/types/products";
-import { useCart } from "@/hook/userAddToCart";
+import { useCart } from "@/hook/useCart";
 import ProductComboSection from "@/components/product-combo-section";
+import QuantityInput from "@/components/quantity-input";
 
 export default function ProductDetailPage() {
   const { id } = useParams();
   const navigate = useNavigate();
   const product = useAtomValue(productDetailState(String(id)))!;
   const [selectedProduct, setSelectedProduct] = useState<Product>();
+  const [quantity, setQuantity] = useState(1);
 
   const [tab, setTab] = useState<
     'detail' | 'ingredients'
@@ -36,7 +38,7 @@ export default function ProductDetailPage() {
       label: 'Thành phần',
     },
   ];
-  const { addToCart } = useCart(); //fix later
+  const { addToCart, buyNow } = useCart();
 
   const renderVariant = () => {
     const listVariant = product?.sku_related?.filter(x => x.sell_on?.includes("Web Ecogreen") && x.brand !== "COMBO")
@@ -106,7 +108,7 @@ export default function ProductDetailPage() {
               previewImages={product?.images?.map(x => x.slug)}
             />
           </div>
-          {renderVariant()}
+          {renderVariant()} 
           <div className="text-[24px] font-[700] text-primary">
             {formatPrice(Number(product.discount_price || product.original_price))}
           </div>
@@ -115,6 +117,16 @@ export default function ProductDetailPage() {
               {formatPrice(Number(product.original_price))}
             </div>
           )}
+          <div className="pt-2">
+            <QuantityInput
+              value={quantity}
+              minValue={1}
+              size={25}
+              onChange={(value) => {
+                setQuantity(value)
+              }}
+            />
+          </div>
         </div>
         {product?.description && (
           <>
@@ -142,11 +154,15 @@ export default function ProductDetailPage() {
         <Button
           large
           onClick={() => {
-            if(!selectedProduct) {
+            if(!selectedProduct && product.brand !== "COMBO") {
               toast.error("Vui lòng chọn loại sản phẩm");
               return;
             }
-            addToCart(selectedProduct as Product, 1);
+            if (selectedProduct) {
+              addToCart(selectedProduct as Product, quantity);
+            } else {
+              addToCart(product as Product, quantity);
+            }
             toast.success("Đã thêm vào giỏ hàng");
           }}
         >
@@ -156,11 +172,16 @@ export default function ProductDetailPage() {
           large
           primary
           onClick={() => {
-            if(!selectedProduct) {
+            if (!selectedProduct && product.brand !== "COMBO") {
               toast.error("Vui lòng chọn loại sản phẩm");
               return;
             }
-            navigate("/cart");
+            if (selectedProduct) {
+              buyNow(selectedProduct as Product, quantity);
+            } else {
+              buyNow(product as Product, quantity);
+            }
+            navigate("/check-out");
           }}
         >
           Mua ngay
