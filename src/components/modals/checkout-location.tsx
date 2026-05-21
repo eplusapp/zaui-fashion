@@ -154,6 +154,9 @@ export default function CheckoutLocation(props: Props) {
     }
     const renderEcoReceive = () => {
         return <>
+            <div className="text-[20px] font-[600] w-full text-center">
+                Chọn chi nhánh ECO mong muốn
+            </div>
             {ecoAddress.map((item) => (
                 <div onClick={() => {
                     setSelectedProvince({

@@ -42,7 +42,7 @@ export default function ProductItem(props: ProductItemProps) {
           {image ? (
             <img
               src={image.slug}
-              className="w-full aspect-square object-cover"
+              className="w-full  aspect-square object-cover"
               style={{
                 viewTransitionName:
                   isTransitioning && selected
@@ -54,7 +54,7 @@ export default function ProductItem(props: ProductItemProps) {
           ) : null}
 
           <div className="flex flex-col items-center py-2 pt-0 text-center">
-            <div className="text-base line-clamp-2">
+            <div className="text-base line-clamp-3 px-4">
               {props.product.name}
             </div>
             <div className="flex w-full items-center justify-between pt-2 px-2">

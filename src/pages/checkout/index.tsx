@@ -22,6 +22,8 @@ export default function CheckoutPage() {
   const { items, totalPrice, clearBuyNow } = useCart();
   
   const [enableReciver, setEnableReciver] = useState(false)
+  const [enableExport, setEnableExport] = useState(false)
+
   const [recive, setRecive] = useState<'customer' | 'eco'>()
   useEffect(() => {
     return () => {
@@ -39,6 +41,11 @@ export default function CheckoutPage() {
     name: "",
     phone: "",
     email: "",
+  })
+  const [exportForm, setExportForm] = useState({
+    companyName: "",
+    taxCode: "",
+    address: "",
   })
   return (
     <div className="pt-2">
@@ -125,12 +132,17 @@ export default function CheckoutPage() {
         <div className="w-full my-4">
           <div className="flex items-center">
             <Checkbox
-              checked={enableReciver}
-              onChange={(checked) => setEnableReciver(checked)}
+              checked={enableExport}
+              onChange={(checked) => setEnableExport(checked)}
             />
             <div className="ml-2 text-base font-[500]">Thông tin xuất hóa đơn</div>
           </div>
-          <div className="mt-4 border rounded-md pt-4 bg-white">
+          {enableExport && <div className="my-4 flex flex-col gap-4">
+            <TextInput title="Tên công ty" value={exportForm.companyName} onChange={(value) => setExportForm({ ...exportForm, companyName: value })} placeHolder="Nhập tên công ty" />
+            <TextInput title="Mã số thuế" value={exportForm.taxCode} onChange={(value) => setExportForm({ ...exportForm, taxCode: value })} placeHolder="Nhập mst" />
+            <TextInput title="Địa chỉ" value={exportForm.address} onChange={(value) => setExportForm({ ...exportForm, address: value })} placeHolder="Nhập địa chỉ công ty" />
+          </div>}
+          <div className="mt-6 border rounded-md pt-4 bg-white">
             <div className="px-4">
               <div className="w-full font-[700] text-lg">
                 Tổng đơn hàng
