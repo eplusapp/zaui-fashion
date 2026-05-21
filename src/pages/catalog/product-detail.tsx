@@ -163,7 +163,6 @@ export default function ProductDetailPage() {
             } else {
               addToCart(product as Product, quantity);
             }
-            toast.success("Đã thêm vào giỏ hàng");
           }}
         >
           Thêm vào giỏ

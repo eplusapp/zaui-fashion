@@ -24,7 +24,9 @@ export default function ProductListPage() {
   const products = useAtomValue(productsState(params));
   return (
     <>
-      <SearchBar onClick={() => navigate("/search")} />
+      <div className="pb-2">
+        <SearchBar onClick={() => navigate("/search")} />
+      </div>
       <HorizontalDivider />
       <ProductGrid products={products} className="pt-4 pb-[13px]" />
     </>

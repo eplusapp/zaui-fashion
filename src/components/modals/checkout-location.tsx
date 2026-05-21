@@ -6,9 +6,10 @@ import { useAtomValue } from "jotai";
 import { provincesState, wardsState } from "@/request/locations";
 import { unwrap } from "jotai/utils";
 import TextInput from "../text-input";
+import { ReciveType } from "@/types/products";
 type Props = {
-    recive?: 'customer' | 'eco';
-    setRecive: (value: 'customer' | 'eco') => void;
+    recive?: ReciveType;
+    setRecive: React.Dispatch<React.SetStateAction<ReciveType | undefined>>;
 }
 const ecoAddress = [{
     address: '180 Trường Chinh',
@@ -40,34 +41,33 @@ export default function CheckoutLocation(props: Props) {
     const [open, setOpen] = useState(false);
     const provinces = useAtomValue(provincesState({}));
 
-    const [selectedProvince, setSelectedProvince] = useState<{id: string; name: string}>();
-    const [selectedWard, setSelectedWard] = useState<{ id: string; name: string }>();
-    const [address, setAddress] = useState("");
-
     const wardsAtom = useMemo(() => {
         return unwrap(
             wardsState({
-                provinceId: selectedProvince?.id,
+                provinceId: recive?.selectedProvince?.id,
             }),
             (prev) => prev ?? [],
         );
-    }, [selectedProvince]);
+    }, [recive?.selectedProvince?.id]);
 
     const wards = useAtomValue(wardsAtom);
 
     const selectedProvinceData = useMemo(() => {
-        return provinces.find((x) => x.code === selectedProvince?.id);
-    }, [provinces, selectedProvince]);
+        return provinces.find((x) => x.code === recive?.selectedProvince?.id);
+    }, [provinces, recive?.selectedProvince]);
 
     const selectedWardData = useMemo(() => {
-        return wards.find((x) => x.code === selectedWard?.id);
-    }, [wards, selectedWard]);
+        return wards.find((x) => x.code === recive?.selectedWard?.id);
+    }, [wards, recive?.selectedWard]);
 
     useEffect(() => {
-        if (recive === 'customer') {
-            setSelectedWard(undefined);
+        if (recive?.type === 'customer') {
+            setRecive({
+                ...recive,
+                selectedWard: undefined,
+            })
         }
-    }, [selectedProvince]);
+    }, [recive?.selectedProvince]);
     const renderCustomerReceive = () => {
         return <>
             <div className="text-[20px] font-[600] w-full text-center">
@@ -78,16 +78,20 @@ export default function CheckoutLocation(props: Props) {
                     Tỉnh / Thành phố
                 </div>
                 <select
-                    value={selectedProvince?.id || ""}
+                    value={recive?.selectedProvince?.id || ""}
                     onChange={(e) => {
                         const province = provinces.find(
                             (x) => x.code === e.target.value,
                         );
                         if (!province) return;
-                        setSelectedProvince({
-                            id: province.code,
-                            name: province.name,
-                        });
+                        setRecive({
+                            ...recive,
+                            type: recive?.type || "customer",
+                            selectedProvince: {
+                                id: province.code,
+                                name: province.name,
+                            }
+                        })
                     }}
                     className="h-12 w-full rounded-[8px] border border-gray-300 bg-white px-4 outline-none"
                 >
@@ -109,19 +113,26 @@ export default function CheckoutLocation(props: Props) {
                     Phường / Xã
                 </div>
                 <select
-                    value={selectedWard?.id || ""}
-                    disabled={!selectedProvince}
+                    value={recive?.selectedWard?.id || ""}
+                    disabled={!recive?.selectedProvince}
                     onChange={(e) => {
                         const ward = wards.find(
                             (x) => x.code === e.target.value,
                         );
 
                         if (!ward) return;
-
-                        setSelectedWard({
-                            id: ward.code,
-                            name: ward.name,
-                        });
+                        setRecive({
+                            ...recive,
+                            type: recive?.type || "customer",
+                            selectedWard: {
+                                id: ward.code,
+                                name: ward.name,
+                            }
+                        })
+                        // setSelectedWard({
+                        //     id: ward.code,
+                        //     name: ward.name,
+                        // });
                     }}
                     className="h-12 w-full rounded-[8px] border border-gray-300 bg-white px-4 outline-none disabled:bg-gray-100"
                 >
@@ -139,7 +150,13 @@ export default function CheckoutLocation(props: Props) {
                     ))}
                 </select>
             </div>
-            <TextInput title="Địa chỉ" value={address} onChange={(value) => setAddress(value)} placeHolder="Nhập địa chỉ" />
+            <TextInput title="Địa chỉ" value={String(recive?.address)} onChange={(value) => {
+                setRecive({
+                    ...recive,
+                    type: recive?.type || "customer",
+                    address: value,
+                })
+            }} placeHolder="Nhập địa chỉ" />
         </>
     }
     const getFullAddress = (val: any) => {
@@ -159,15 +176,19 @@ export default function CheckoutLocation(props: Props) {
             </div>
             {ecoAddress.map((item) => (
                 <div onClick={() => {
-                    setSelectedProvince({
-                        id: item.province_id,
-                        name: item.province_name
+                    setRecive({
+                        ...recive,
+                        type: recive?.type || 'customer',
+                        selectedProvince: {
+                            id: item.province_id,
+                            name: item.province_name
+                        },
+                        selectedWard: {
+                            id: item.ward_id,
+                            name: item.ward_name
+                        },
+                        address: item.address
                     })
-                    setSelectedWard({
-                        id: item.ward_id,
-                        name: item.ward_name
-                    })
-                    setAddress(item.address)
                     setOpen(false)
                 }} key={item.address} className="border border-gray-300 rounded-lg p-4">
                     <div className="text-sm text-gray-500">{getFullAddress(item)}</div>
@@ -180,7 +201,10 @@ export default function CheckoutLocation(props: Props) {
             <div className="w-full my-4">
                 <Radio.Group
                     onChange={(x) => {
-                        setRecive(String(x) as 'customer' | 'eco')
+                        setRecive({
+                            ...recive,
+                            type: String(x) as 'customer' | 'eco'
+                        })
                         setOpen(true)
                     }}
                     defaultValue="customer"
@@ -201,9 +225,8 @@ export default function CheckoutLocation(props: Props) {
                     <div className="text-sm text-gray-500">
                         Địa chỉ đã chọn
                     </div>
-
                     <div className="mt-2 text-base font-semibold">
-                        {address}, {selectedWardData.name},  {selectedProvinceData.name}
+                        {recive?.address}, {selectedProvinceData?.name},  {selectedWardData?.name}
                     </div>
                 </div>
             )}
@@ -212,7 +235,7 @@ export default function CheckoutLocation(props: Props) {
                 onClose={() => setOpen(false)}
             >
                 <div className="flex flex-col gap-4 mt-2">
-                    {recive === 'customer' ? renderCustomerReceive() : renderEcoReceive()}
+                    {recive?.type === 'customer' ? renderCustomerReceive() : renderEcoReceive()}
                     <Button
                         primary
                         onClick={() => setOpen(false)}
@@ -220,13 +243,19 @@ export default function CheckoutLocation(props: Props) {
                         Đóng
                     </Button>
                     <div onClick={() => {
-                        if (recive === 'customer') {
-                            setRecive('eco')
+                        if (recive?.type === 'customer') {
+                            setRecive({
+                                ...recive,
+                                type: 'eco'
+                            })
                         } else {
-                            setRecive('customer')
+                            setRecive({
+                                ...recive,
+                                type: 'customer'
+                            })
                         }
                     }} className="mb-2 text-xs font-[600] text-primary">
-                        <Icon icon="zi-arrow-left" />{recive === 'customer' ? 'Hoặc, Nhận hàng tại Công ty Dược phẩm ECO' : 'Hoặc, Giao hàng tận nơi'}
+                        <Icon icon="zi-arrow-left" />{recive?.type === 'customer' ? 'Hoặc, Nhận hàng tại Công ty Dược phẩm ECO' : 'Hoặc, Giao hàng tận nơi'}
                     </div>
                 </div>
             </Modal>

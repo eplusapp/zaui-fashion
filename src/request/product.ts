@@ -3,30 +3,36 @@ import { atomFamily, unwrap } from "jotai/utils";
 import { Cart, Category, Color } from "@/types";
 import { requestWithFallback } from "@/utils/request";
 import { getUserInfo } from "zmp-sdk";
-import { PaginatedResponse  } from "@/types/pagination";
-import { FlashSaleSetting, FlashSaleSettingRes, Product, ProductDetail, ProductParams } from "@/types/products";
+import { PaginatedResponse } from "@/types/pagination";
+import {
+  FlashSaleSetting,
+  FlashSaleSettingRes,
+  Product,
+  ProductDetail,
+  ProductParams,
+} from "@/types/products";
 import deepEqual from "fast-deep-equal";
 
 export const userState = atom(() =>
   getUserInfo({
     avatarType: "normal",
-  })
+  }),
 );
-
 
 export const bestProductsState = atom(async (get) => {
   // const categories = await get(categoriesState);
-  const res = await requestWithFallback<
-    (PaginatedResponse<Product>)
-  >("/api/product/best-seller", {
-    data: [],
-    paginate: {
-      total_data: 0,
-      total_page: 0,
-      page: 0,
-      limit: 0
-    }
-  });
+  const res = await requestWithFallback<PaginatedResponse<Product>>(
+    "/api/product/best-seller",
+    {
+      data: [],
+      paginate: {
+        total_data: 0,
+        total_page: 0,
+        page: 0,
+        limit: 0,
+      },
+    },
+  );
   return res.data;
 });
 
@@ -83,4 +89,29 @@ export const productDetailState = atomFamily((id: string) =>
     });
     return res.data;
   }),
+);
+  export interface GetFeeByCodeBody {
+    receiverProvinceErpId?: string | number;
+    receiverProvinceName?: string;
+    receiverDistrictErpId?: string | number;
+    weight?: number;
+    price?: number;
+  }
+export const feeByCodeState = atomFamily(
+  (body: GetFeeByCodeBody) =>
+    atom(async () => {
+      const res = await requestWithFallback<any>(
+        "/api/app/Booking/GetFeeByCode/get-fee-by-code",
+        {
+          data: undefined,
+        },
+        {
+          method: "POST",
+          body: JSON.stringify(body),
+        },
+      );
+
+      return res.data;
+    }),
+  deepEqual,
 );

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Product } from "@/types/products";
+import { Product, ReciveType } from "@/types/products";
 import CollapseView from "@/components/collapse-view";
 import HorizontalDivider from "@/components/horizontal-divider";
 import { useCart } from "@/hook/useCart";
@@ -10,21 +10,19 @@ import Checkbox from "@/components/checkbox";
 import { Radio } from "zmp-ui";
 import Button from "@/components/button";
 import { formatPrice } from "@/utils/format";
-import { useAtomValue } from "jotai";
+import { useAtom, useAtomValue } from "jotai";
 import { provincesState } from "@/request/locations";
 import DemoPage from "@/components/modals/checkout-location";
 import CheckoutLocation from "@/components/modals/checkout-location";
-type Props = {
-  searchResult: Product[];
-};
-
+import { feeByCodeState } from "@/request/product";
+ 
 export default function CheckoutPage() {
   const { items, totalPrice, clearBuyNow } = useCart();
   
   const [enableReciver, setEnableReciver] = useState(false)
   const [enableExport, setEnableExport] = useState(false)
 
-  const [recive, setRecive] = useState<'customer' | 'eco'>()
+  const [recive, setRecive] = useState<ReciveType>()
   useEffect(() => {
     return () => {
       clearBuyNow()
@@ -47,6 +45,31 @@ export default function CheckoutPage() {
     taxCode: "",
     address: "",
   })
+  const getTotalProductWeight = ()  => {
+    let totalWeight = items.reduce((acc, item) => {
+      return acc + item.product.weight * item.quantity
+    }, 0)
+    totalWeight += 240 // 240g là trọng lượng của hộp đựng sản phẩm
+    return totalWeight
+  }
+  // const [feeData, refreshFee] = useAtom(
+  //   feeByCodeState({
+  //     receiverProvinceErpId: res?.deliveryAddress?.province_id,
+  //     receiverProvinceName: res?.deliveryAddress?.province_name,
+  //     receiverDistrictErpId: res?.deliveryAddress?.district_id,
+  //     weight: getTotalProductWeight,
+  //     price: totalPrice,
+  //   }),
+  // );
+  const getDeliveryFee = async () => {
+    // const data = await this.$apis.location.getFeeByCode({
+    //   receiverProvinceErpId: res?.deliveryAddress?.province_id,
+    //   receiverProvinceName: res?.deliveryAddress?.province_name,
+    //   receiverDistrictErpId: res?.deliveryAddress?.district_id,
+    //   weight: this.getTotalProductWeight,
+    //   price: this.summary.payment
+    // })
+  }
   return (
     <div className="pt-2">
       <HorizontalDivider />
@@ -175,14 +198,14 @@ export default function CheckoutPage() {
                 <div className="mb-2">
                   Nhập mã mua hàng (mã giảm giá)
                 </div>
-                <div className="flex gap-4">
+                <div className="flex gap-2">
                   <TextInput
                     placeHolder="Nhập mã mua hàng (mã giảm giá)"
                     title=""
                     value=""
                     onChange={() => { }}
                   />
-                  <Button className="w-[150px] text-[12px]" primary>
+                  <Button className="w-[150px] line text-[12px]" primary>
                     Áp dụng
                   </Button>
                 </div>

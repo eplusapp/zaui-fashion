@@ -3,7 +3,7 @@ import { useCallback, useMemo } from "react";
 
 import { Product } from "@/types/products";
 import { CartItem } from "@/types/cart";
-
+import toast from "react-hot-toast";
 import { buyNowState, cartState } from "@/request/cart";
 
 export function useCart() {
@@ -48,6 +48,7 @@ export function useCart() {
 
         return calculateCart(items);
       });
+      toast.success("Đã thêm vào giỏ hàng");
     },
     [setCart, calculateCart],
   );

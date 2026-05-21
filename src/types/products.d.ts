@@ -167,3 +167,11 @@ export interface Product {
   sell_on: string[];
   weight: number;
 }
+
+
+export type ReciveType = {
+  type: 'customer' | 'eco',
+  selectedProvince?: { id: string; name: string },
+  selectedWard?: { id: string; name: string },
+  address?: string
+}
