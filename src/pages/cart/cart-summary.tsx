@@ -9,7 +9,7 @@ import HorizontalDivider from "@/components/horizontal-divider";
 import { useNavigate } from "react-router-dom";
 
 export default function CartSummary() {
-  const {totalPrice, totalQuantity} = useCart();
+  const {totalPrice, totalQuantity, summary} = useCart();
     const navigate = useNavigate();
   
   const checkout = () => {
@@ -21,13 +21,47 @@ export default function CartSummary() {
         <div className="text-xl font-[700] text-[#202332] text-subtitle">Tổng đơn hàng</div>
         <div className="flex justify-between items-center">
           <div className="text-lg font-medium text-primary">
-            Thanh toán
+            Tổng đơn hàng
           </div>
-          <div className="text-lg font-[900] font-medium text-primary">
-            {formatPrice(totalPrice)}
+          <div className="text-lg font-[900] font-medium">
+            {formatPrice(summary.subtotal)}
           </div>
         </div>
+        {Boolean(summary.discounted) && <div className="flex justify-between items-center">
+          <div className="text-lg font-medium text-primary">
+            Giảm giá sản phẩm
+          </div>
+          <div className="text-lg font-[900] font-medium text-danger">
+            {formatPrice(summary.discounted)}
+          </div>
+        </div>}
+        
+        {Boolean(summary.crossSale) && <div className="flex justify-between items-center">
+          <div className="text-lg font-medium text-primary">
+            Giảm giá Cross sale
+          </div>
+          <div className="text-lg font-[900] font-medium text-danger">
+            {formatPrice(summary.crossSale)}
+          </div>
+        </div>}
+        {Boolean(summary.totalDiscount) && <div className="flex justify-between items-center">
+          <div className="text-lg font-medium text-primary">
+            Tiết kiệm
+          </div>
+          <div className="text-lg font-[900] font-medium text-danger">
+            {formatPrice(summary.totalDiscount)}
+          </div>
+        </div>}
+        
         <HorizontalDivider />
+        <div className="flex justify-between items-center">
+          <div className="text-lg font-bold">
+            Thanh toán
+          </div>
+          <div className="text-[20px] font-bold">
+            {formatPrice(summary.payment)}
+          </div>
+        </div>
         <Button onClick={checkout} className="w-full" primary disabled={totalQuantity === 0}>
           Mua ngay
         </Button>

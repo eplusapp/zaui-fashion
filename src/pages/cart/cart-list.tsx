@@ -7,7 +7,7 @@ export default function CartList() {
   const { items } = useCart();
 
   return (
-    <div className="flex-1 overflow-y-auto">
+    <div className="flex-1">
       {items.map((item) => (
         <CartItem key={item.id} {...item} />
       ))}

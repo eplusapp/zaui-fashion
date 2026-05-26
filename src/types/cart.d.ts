@@ -11,3 +11,12 @@ export type Cart = {
   totalQuantity: number;
   totalPrice: number;
 };
+
+export type CartSummary = {
+  subtotal: number;
+  discounted: number;
+  totalDiscount: number;
+  shippingFee: number;
+  payment: number;
+  totalQuantity: number;
+};

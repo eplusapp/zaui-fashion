@@ -1,36 +1,31 @@
-import Checkbox from "@/components/checkbox";
 import QuantityInput from "@/components/quantity-input";
-import { useAddToCart } from "@/hooks";
 import { CartItem as CartItemProps } from "@/types/cart";
 import { formatPrice } from "@/utils/format";
-import { animated, useSpring } from "@react-spring/web";
-import { useDrag } from "@use-gesture/react";
 import { RemoveIcon } from "@/components/vectors";
-import { useAtom } from "jotai";
-import { selectedCartItemIdsState } from "@/state";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo } from "react";
 import { useCart } from "@/hook/useCart";
 
-const SWIPE_TO_DELTE_OFFSET = 80;
-
 export default function CartItem(props: CartItemProps) {
-  const { addToCart, updateQuantity, removeFromCart } = useCart();
+  const { getDiscount, updateQuantity, removeFromCart } = useCart();
 
+  const thump = props.product?.images?.find(x => x.type === 'thumbnail')
+  const discount = useMemo(() => getDiscount(props.product), [props.product.discount_price, props.product.original_price])
 
   return (
     <div className="relative">
       <div
-        // {...bind()}
-        // style={{ x }}
         className="bg-white pl-4 flex items-center space-x-4 relative"
       >
-        <img src={props.product?.images[0]?.slug} className="w-24 h-24 rounded-lg" />
+        <img src={thump?.slug} className="w-24 h-24 rounded-lg" />
+        {Boolean(discount) && <div className="absolute top-2 left-[-12px] bg-danger w-8 h-8 items-center justify-center flex rounded-full text-white text-[10px] font-[900]">
+          -{discount}%
+        </div>}
         <div className="py-4 pr-4 flex-1 border-b-[0.5px] border-black/10">
           <div className="text-lg font-[700] mb-2">{props.product.name}</div>
 
           <div className="flex-1 flex flex-col flex-wrap gap-1">
             {props.product.original_price && (
-              <div className="text-base   text-[##000C17]">
+              <div className="text-base line-through text-[##000c17]">
                 {formatPrice(Number(props.product.original_price))}
               </div>
             )}

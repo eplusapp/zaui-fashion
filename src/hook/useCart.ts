@@ -2,7 +2,7 @@ import { useAtom } from "jotai";
 import { useCallback, useMemo } from "react";
 
 import { Product } from "@/types/products";
-import { CartItem } from "@/types/cart";
+import { CartItem, CartSummary } from "@/types/cart";
 import toast from "react-hot-toast";
 import { buyNowState, cartState } from "@/request/cart";
 
@@ -171,13 +171,131 @@ export function useCart() {
     return checkoutItems.reduce((sum, item) => sum + item.quantity, 0);
   }, [checkoutItems]);
 
+  const calculateSummary = (
+    items: CartItem[],
+    shippingFee = 0,
+  ): CartSummary => {
+    const subtotal = items.reduce((sum, item) => {
+      return sum + Number(item.product.original_price || 0) * item.quantity;
+    }, 0);
+
+    const discounted = items.reduce((sum, item) => {
+      const original = Number(item.product.original_price || 0);
+      const discount = Number(
+        item.product.discount_price ?? item.product.original_price ?? 0,
+      );
+
+      return sum + (original - discount) * item.quantity;
+    }, 0);
+
+    const payment = items.reduce((sum, item) => {
+      const price = Number(
+        item.product.discount_price ?? item.product.original_price ?? 0,
+      );
+
+      return sum + price * item.quantity;
+    }, 0);
+
+    const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
+
+    return {
+      subtotal,
+      discounted,
+      totalDiscount: discounted,
+      shippingFee,
+      payment: payment + shippingFee,
+      totalQuantity,
+    };
+  };
+
+  const getPromotionPrice = (items: CartItem[], hasVoucher: boolean) => {
+    if (hasVoucher) return 0;
+
+    const promotionItems = items.filter((item) => {
+      return (
+        listPromotionProduct.some((code) =>
+          item.product.product_code?.toLowerCase().includes(code.toLowerCase()),
+        ) && item.product.product_type !== "combo"
+      );
+    });
+
+    if (!promotionItems.length) return 0;
+
+    const now = new Date();
+
+    let eligibleItems = promotionItems;
+
+    const activeFlashSale = FLASH_SALE_SLOTS.find(
+      (slot) => now >= slot.startAt && now < slot.endAt,
+    );
+
+    if (activeFlashSale) {
+      eligibleItems = promotionItems.filter(
+        (item) =>
+          !activeFlashSale.products.some((code) =>
+            item.product.product_code
+              ?.toLowerCase()
+              .includes(code.toLowerCase()),
+          ),
+      );
+    }
+
+    if (!eligibleItems.length) return 0;
+
+    for (const program of PROGRAMS) {
+      const isAfterStart = !program.startAt || now >= program.startAt;
+
+      const isBeforeEnd = !program.endAt || now < program.endAt;
+
+      if (!isAfterStart || !isBeforeEnd) {
+        continue;
+      }
+
+      if (program.name === "crossSale") {
+        return program.getDiscount(eligibleItems, items);
+      }
+
+      const totalPromotionPrice = eligibleItems.reduce(
+        (sum, item) =>
+          sum +
+          Number(item.product.discount_price ?? item.product.original_price) *
+            item.quantity,
+        0,
+      );
+
+      return program.getDiscount([]);
+    }
+
+    return 0;
+  };
+
+
+  const summary = useMemo(() => {
+    const promotion = getPromotionPrice(checkoutItems, false);
+    const summary = calculateSummary(checkoutItems);
+    return {
+      ...calculateSummary(checkoutItems),
+      crossSale: promotion,
+      totalDiscount: summary?.totalDiscount + promotion,
+      payment: summary.payment - promotion,
+    };
+  }, [checkoutItems]);
+
+  const getDiscount = (product: Product) => {
+    const before = Number(product.original_price);
+    const after = Number(product.discount_price);
+    if (before === after || !before) return null;
+    const discount = ((before - after) / before) * 100;
+    return discount.toFixed(0);
+  };
   return {
     cart,
 
     items: checkoutItems,
     totalPrice: checkoutTotalPrice,
     totalQuantity: checkoutTotalQuantity,
-
+    calculateSummary,
+    summary,
     clearBuyNow,
     buyNow,
     addToCart,
@@ -192,5 +310,119 @@ export function useCart() {
     isInCart,
 
     clearCart,
+    getDiscount,
   };
 }
+
+
+const CROSS_SALE_DISCOUNT_RATES = {
+  RI1: 0.1,
+  RI3: 0.15,
+  RI6: 0.1,
+  WT1: 0.1,
+  WT3: 0.1,
+  WT6: 0.1,
+  FA3: 0.1,
+  HE3: 0.1,
+  QW1: 0.1,
+  QW3: 0.1,
+  QM1: 0.1,
+  QM3: 0.1,
+};
+export const listPromotionProduct = [
+  "RI1",
+  "RI3",
+  "RI6",
+  "WT1",
+  "WT3",
+  "WT6",
+  "FA3",
+  "HE3",
+  "QW1",
+  "QW3",
+  "QM1",
+  "QM3",
+];
+
+const PROGRAMS = [
+  {
+    name: "motherDay",
+    endAt: new Date(2026, 4, 11, 0, 0, 0, 0),
+    getDiscount: (price) => price * 0.1,
+  },
+  {
+    name: "worldCup",
+    endAt: new Date(2026, 4, 21, 0, 0, 0, 0),
+    tiers: [
+      { minPrice: 899000, discount: 79000 },
+      { minPrice: 699000, discount: 59000 },
+      { minPrice: 499000, discount: 39000 },
+    ],
+    getDiscount(price) {
+      const tier = this.tiers.find((t) => price >= t.minPrice);
+      return tier?.discount ?? 0;
+    },
+  },
+  {
+    name: "crossSale",
+    startAt: new Date(2026, 4, 23, 0, 0, 0, 0),
+    endAt: new Date(2026, 4, 30, 0, 0, 0, 0),
+    getDiscount: (items: CartItem[], allListItems?: any) => {
+      const nonComboItems = allListItems.filter(
+        (item) => item.item?.product_type !== "combo",
+      );
+      const totalNonComboQty = nonComboItems.reduce(
+        (sum, cur) => sum + Number(cur?.quantity),
+        0,
+      );
+      if (totalNonComboQty < 2) return 0;
+
+      return items.reduce((total, cur) => {
+        if (cur.product.product_code === "combo") return total;
+
+        const productCode = cur.product.product_code?.toUpperCase() || "";
+        const matchedCode = Object.keys(CROSS_SALE_DISCOUNT_RATES).find(
+          (code) => productCode.includes(code),
+        );
+        if (!matchedCode) return total;
+
+        const rate = CROSS_SALE_DISCOUNT_RATES[matchedCode];
+        const originalPrice = Number(cur?.product?.original_price) || 0;
+        const quantity = Number(cur?.quantity) || 0;
+
+        return total + originalPrice * rate * quantity;
+      }, 0);
+    },
+  },
+];
+const FLASH_SALE_SLOTS = [
+  {
+    startAt: new Date(2026, 4, 14, 0, 0, 0, 0),
+    endAt: new Date(2026, 4, 16, 0, 0, 0, 0),
+    products: ["RI1", "RI3", "RI6"],
+    bannerUrl: "/img/banner-flash-sale.png",
+  },
+  {
+    startAt: new Date(2026, 4, 16, 0, 0, 0, 0),
+    endAt: new Date(2026, 4, 17, 0, 0, 0, 0),
+    products: ["QW1", "QW3", "QM1", "QM3"],
+    bannerUrl: "/img/banner-flash-sale-1605.gif",
+  },
+  {
+    startAt: new Date(2026, 4, 21, 0, 0, 0, 0),
+    endAt: new Date(2026, 4, 22, 0, 0, 0, 0),
+    products: ["RI1", "RI3", "RI6"],
+    bannerUrl: "/img/banner-flash-sale.png",
+  },
+  {
+    startAt: new Date(2026, 4, 22, 0, 0, 0, 0),
+    endAt: new Date(2026, 4, 23, 0, 0, 0, 0),
+    products: ["QW1", "QW3", "QM1", "QM3"],
+    bannerUrl: "/img/banner-flash-sale-1605.gif",
+  },
+  {
+    startAt: new Date(2026, 4, 30, 0, 0, 0, 0),
+    endAt: new Date(2026, 5, 1, 0, 0, 0, 0),
+    products: ["WT1", "WT3", "WT6", "FA3", "HE3"],
+  },
+];

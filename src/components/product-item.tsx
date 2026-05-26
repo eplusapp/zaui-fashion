@@ -1,7 +1,7 @@
 import { Product } from "@/types/products";
 import { formatPrice } from "@/utils/format";
 import TransitionLink from "./transition-link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import IcPlus from "@/static/icon/plus.png";
 import { useCart } from "@/hook/useCart";
 
@@ -17,7 +17,9 @@ export interface ProductItemProps {
 export default function ProductItem(props: ProductItemProps) {
   const [selected, setSelected] = useState(false);
   const image = props.product.images?.find(x => x.type === 'thumbnail')
-  const { addToCart } = useCart()
+  const { addToCart, getDiscount } = useCart()
+  const discount = useMemo(() => getDiscount(props.product), [props.product.discount_price, props.product.original_price])
+  
   return (
     <TransitionLink
       className="
@@ -32,6 +34,8 @@ export default function ProductItem(props: ProductItemProps) {
         transition-all duration-200
         hover:shadow-md
         hover:-translate-y-1
+        relative
+        
       "
       to={`/product/${props.product.slug}`}
       replace={props.replace}
@@ -52,7 +56,9 @@ export default function ProductItem(props: ProductItemProps) {
               alt={props.product.name}
             />
           ) : null}
-
+          {Boolean(discount) && <div className="absolute top-2 left-2 bg-danger w-10 h-10 items-center justify-center flex rounded-full text-white text-[12px] font-[900]">
+            -{discount}%
+          </div>}
           <div className="flex flex-col items-center py-2 pt-0 text-center">
             <div className="text-base line-clamp-3 px-4">
               {props.product.name}
