@@ -2,7 +2,14 @@ import { atom } from "jotai";
 import { atomFamily } from "jotai/utils";
 import deepEqual from "fast-deep-equal";
 import { requestWithFallback } from "@/utils/request";
-import { ProvinceParams, ProvinceResponse, WardParams, WardResponse } from "@/types/locations";
+import {
+  DelivertyTimeRespond,
+  DeliveryTimeParams,
+  ProvinceParams,
+  ProvinceResponse,
+  WardParams,
+  WardResponse,
+} from "@/types/locations";
 
 export const provincesState = atomFamily(
   (params: ProvinceParams = {}) =>
@@ -79,6 +86,26 @@ export const wardsState = atomFamily(
       return (res.data?.wards || []).sort(
         (a, b) => (a.sort || 0) - (b.sort || 0),
       );
+    }),
+  deepEqual,
+);
+
+export const deliveryTimeState = atomFamily(
+  (params: DeliveryTimeParams) =>
+    atom(async () => {
+      const { provinceId } = params;
+      const res = await requestWithFallback<any>(
+        `/api/admin/estimated-delivery/public?provinceId=${provinceId}&orderType=1`,
+        {
+          estimatedWareHouse: "",
+          estimatedWareHousePeriod: "",
+        },
+        {
+          method: "GET",
+        },
+      );
+
+      return res;
     }),
   deepEqual,
 );

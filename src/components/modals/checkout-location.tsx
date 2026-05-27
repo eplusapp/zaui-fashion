@@ -3,7 +3,7 @@ import Button from "../button";
 import Modal from "./modal";
 import { Icon, Radio } from "zmp-ui";
 import { useAtomValue } from "jotai";
-import { provincesState, wardsState } from "@/request/locations";
+import { deliveryTimeState, provincesState, wardsState } from "@/request/locations";
 import { unwrap } from "jotai/utils";
 import TextInput from "../text-input";
 import { ReciveType } from "@/types/products";
@@ -40,7 +40,7 @@ export default function CheckoutLocation(props: Props) {
     const { recive, setRecive } = props;
     const [open, setOpen] = useState(false);
     const provinces = useAtomValue(provincesState({}));
-
+ 
     const wardsAtom = useMemo(() => {
         return unwrap(
             wardsState({
@@ -59,6 +59,22 @@ export default function CheckoutLocation(props: Props) {
     const selectedWardData = useMemo(() => {
         return wards.find((x) => x.code === recive?.selectedWard?.id);
     }, [wards, recive?.selectedWard]);
+
+    const timeReciver = useAtomValue(deliveryTimeState({
+        provinceId: selectedProvinceData?.code
+    }));
+
+    const getTimeDelivery = () => {
+        const now = new Date();
+        if (timeReciver?.items && timeReciver?.items?.length > 0) {
+            const deliveryDate = new Date(now);
+            deliveryDate.setDate(
+                deliveryDate.getDate() + Number(timeReciver?.items?.[0]?.daysToShip),
+            );
+            return deliveryDate.toLocaleDateString("vi-VN");
+        }
+        return now.toLocaleDateString("vi-VN");
+    };
 
     useEffect(() => {
         if (recive?.type === 'customer') {
@@ -129,10 +145,6 @@ export default function CheckoutLocation(props: Props) {
                                 name: ward.name,
                             }
                         })
-                        // setSelectedWard({
-                        //     id: ward.code,
-                        //     name: ward.name,
-                        // });
                     }}
                     className="h-12 w-full rounded-[8px] border border-gray-300 bg-white px-4 outline-none disabled:bg-gray-100"
                 >
@@ -227,6 +239,9 @@ export default function CheckoutLocation(props: Props) {
                     </div>
                     <div className="mt-2 text-base font-semibold">
                         {recive?.address}, {selectedProvinceData?.name},  {selectedWardData?.name}
+                    </div>
+                    <div className="mt-2 text-base">
+                        Dự kiến giao hàng: {getTimeDelivery()}
                     </div>
                 </div>
             )}

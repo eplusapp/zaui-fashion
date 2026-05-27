@@ -103,7 +103,7 @@ export default function ProductDetailPage() {
           <div className="py-2 pb-0">
             <Carousel
               slides={product?.images?.map((banner) => (
-                <img className="w-full" src={banner.slug} />
+                <img className="w-full aspect-square" src={banner.slug} />
               ))}
               previewImages={product?.images?.map(x => x.slug)}
             />

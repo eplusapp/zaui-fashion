@@ -14,7 +14,6 @@ export interface ProductDetailSection {
   coverUrl?: string;
 }
 
-
 type ProductParams = {
   limit?: number;
   sort_by?: string;
@@ -168,10 +167,36 @@ export interface Product {
   weight: number;
 }
 
-
 export type ReciveType = {
-  type: 'customer' | 'eco',
-  selectedProvince?: { id: string; name: string },
-  selectedWard?: { id: string; name: string },
-  address?: string
+  type: "customer" | "eco";
+  selectedProvince?: { id: string; name: string };
+  selectedWard?: { id: string; name: string };
+  address?: string;
+};
+
+export interface CheckVoucherBody {
+  phone: string;
+  voucherCode: string;
+}
+
+export interface CheckVoucherResponse {
+  success?: boolean;
+  message?: string;
+
+  data?: {
+    code: string;
+    value: number;
+    type: string;
+    discount: number;
+    finalDiscount: number;
+    expiredAt?: string;
+  };
+}
+export interface VoucherItem {
+  code: string;
+  value: number;
+  type: string;
+  discount: number;
+  finalDiscount: number;
+  expiredAt?: string;
 }

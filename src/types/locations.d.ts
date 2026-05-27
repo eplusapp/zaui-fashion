@@ -25,6 +25,14 @@ export interface ProvinceParams {
   size?: number;
 }
 
+export interface DeliveryTimeParams {
+  provinceId: string;
+}
+export interface DelivertyTimeRespond {
+  estimatedWareHouse: string;
+  estimatedWareHousePeriod: string;
+}
+
 export interface WardParams {
   size?: number;
   provinceId?: string;

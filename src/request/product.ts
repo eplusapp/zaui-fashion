@@ -1,17 +1,18 @@
 import { atom } from "jotai";
-import { atomFamily, unwrap } from "jotai/utils";
-import { Cart, Category, Color } from "@/types";
+import { atomFamily } from "jotai/utils";
 import { requestWithFallback } from "@/utils/request";
 import { getUserInfo } from "zmp-sdk";
 import { PaginatedResponse } from "@/types/pagination";
 import {
-  FlashSaleSetting,
+  CheckVoucherBody,
+  CheckVoucherResponse,
   FlashSaleSettingRes,
   Product,
   ProductDetail,
   ProductParams,
 } from "@/types/products";
 import deepEqual from "fast-deep-equal";
+import { CreateOrderBody, CreateOrderResponse } from "@/types/order";
 
 export const userState = atom(() =>
   getUserInfo({
@@ -90,13 +91,13 @@ export const productDetailState = atomFamily((id: string) =>
     return res.data;
   }),
 );
-  export interface GetFeeByCodeBody {
-    receiverProvinceErpId?: string | number;
-    receiverProvinceName?: string;
-    receiverDistrictErpId?: string | number;
-    weight?: number;
-    price?: number;
-  }
+export interface GetFeeByCodeBody {
+  receiverProvinceErpId?: string | number;
+  receiverProvinceName?: string;
+  receiverDistrictErpId?: string | number;
+  weight?: number;
+  price?: number;
+}
 export const feeByCodeState = atomFamily(
   (body: GetFeeByCodeBody) =>
     atom(async () => {
@@ -114,4 +115,69 @@ export const feeByCodeState = atomFamily(
       return res.data;
     }),
   deepEqual,
+);
+//order-vnvc
+export const createOrderState = atom(
+  null,
+  async (_, __, body: CreateOrderBody) => {
+    return requestWithFallback<CreateOrderResponse>(
+      "/api/order",
+      {} as CreateOrderResponse,
+      {
+        method: "POST",
+        body: JSON.stringify(body),
+      },
+    );
+  },
+);
+
+export const getOrderOtpState = atom(null, async () => {
+  return requestWithFallback<Boolean>(
+    "/api/settings?key=ORDER_OTP",
+    false as Boolean,
+    {
+      method: "GET",
+    },
+  );
+});
+export interface GetOrderParams {
+  code: string;
+}
+export interface OrderResponse {
+  code: string;
+  status: string;
+  payment_status: string;
+  customer_fullname: string;
+  customer_phone: string;
+  finalAmount: number;
+  createdAt: string;
+  products: any[];
+}
+
+export const getOrderState = atomFamily(
+  ({ code }: GetOrderParams) =>
+    atom(async () => {
+      return requestWithFallback<OrderResponse>(
+        `/api/order/${code}`,
+        {} as OrderResponse,
+        {
+          method: "GET",
+        },
+      );
+    }),
+  deepEqual,
+);
+
+export const checkingVoucherState = atom(
+  null,
+  async (_, __, body: CheckVoucherBody) => {
+    return requestWithFallback<CheckVoucherResponse>(
+      "/api/order/checking-eco-voucher",
+      {} as CheckVoucherResponse,
+      {
+        method: "POST",
+        body: JSON.stringify(body),
+      },
+    );
+  },
 );

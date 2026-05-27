@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Product, ReciveType } from "@/types/products";
+import { ReciveType, VoucherItem } from "@/types/products";
 import CollapseView from "@/components/collapse-view";
 import HorizontalDivider from "@/components/horizontal-divider";
 import { useCart } from "@/hook/useCart";
@@ -10,19 +10,29 @@ import Checkbox from "@/components/checkbox";
 import { Radio } from "zmp-ui";
 import Button from "@/components/button";
 import { formatPrice } from "@/utils/format";
-import { useAtom, useAtomValue } from "jotai";
-import { provincesState } from "@/request/locations";
-import DemoPage from "@/components/modals/checkout-location";
 import CheckoutLocation from "@/components/modals/checkout-location";
-import { feeByCodeState } from "@/request/product";
+import { AddressType, PaymentType } from "@/types/order";
+import { useCreateOrder } from "@/hook/useCreateOrder";
+import OtpOrderModal from "@/components/modals/otp-order-modal";
+import { useNavigate } from "react-router-dom";
+import { checkingVoucherState } from "@/request/product";
+import { useAtom } from "jotai";
+import toast from "react-hot-toast";
  
 export default function CheckoutPage() {
-  const { items, totalPrice, clearBuyNow } = useCart();
-  
+  const { items, totalPrice, summary, clearBuyNow, clearCart } = useCart();
+  const [paymentType, setPaymentType] = useState<PaymentType>("recieve");
+  const navigate = useNavigate();
+  const [voucher, setVoucher] = useState('')
+  const [voucherList, setVoucherList] = useState<VoucherItem[]>([])
+
   const [enableReciver, setEnableReciver] = useState(false)
   const [enableExport, setEnableExport] = useState(false)
-
+  const [showOtpModal, setShowOtpModal] = useState(false);
   const [recive, setRecive] = useState<ReciveType>()
+  const { createOrder, prepareCreateOrder, loading } = useCreateOrder();
+  const [, checkVoucher] = useAtom(checkingVoucherState);
+
   useEffect(() => {
     return () => {
       clearBuyNow()
@@ -45,31 +55,145 @@ export default function CheckoutPage() {
     taxCode: "",
     address: "",
   })
-  const getTotalProductWeight = ()  => {
-    let totalWeight = items.reduce((acc, item) => {
-      return acc + item.product.weight * item.quantity
-    }, 0)
-    totalWeight += 240 // 240g là trọng lượng của hộp đựng sản phẩm
-    return totalWeight
+  // const getTotalProductWeight = ()  => {
+  //   let totalWeight = items.reduce((acc, item) => {
+  //     return acc + item.product.weight * item.quantity
+  //   }, 0)
+  //   totalWeight += 240 // 240g là trọng lượng của hộp đựng sản phẩm
+  //   return totalWeight
+  // }
+  const getDeliveryFee = () => {
+    return 10000
   }
-  // const [feeData, refreshFee] = useAtom(
-  //   feeByCodeState({
-  //     receiverProvinceErpId: res?.deliveryAddress?.province_id,
-  //     receiverProvinceName: res?.deliveryAddress?.province_name,
-  //     receiverDistrictErpId: res?.deliveryAddress?.district_id,
-  //     weight: getTotalProductWeight,
-  //     price: totalPrice,
-  //   }),
-  // );
-  const getDeliveryFee = async () => {
-    // const data = await this.$apis.location.getFeeByCode({
-    //   receiverProvinceErpId: res?.deliveryAddress?.province_id,
-    //   receiverProvinceName: res?.deliveryAddress?.province_name,
-    //   receiverDistrictErpId: res?.deliveryAddress?.district_id,
-    //   weight: this.getTotalProductWeight,
-    //   price: this.summary.payment
-    // })
+  const handleApplyVoucher = async () => {
+    const result = await checkVoucher({
+      phone: buyerForm.phone,
+      voucherCode: voucher,
+    });
+    if((result as any).error) {
+      toast.error((result as any).message);
+    } else {
+      if (result.data) {
+        setVoucherList([...voucherList, result.data])
+      }
+      toast.success('Thêm voucher thành công')
+    }
+  };
+  const handleCheckout = async (otp: string) => {
+    if (!recive?.selectedProvince) {
+      return;
+    }
+    if (!recive?.selectedWard) {
+      return;
+    }
+    const ship = getDeliveryFee() 
+    const body = {
+      customer_fullname: buyerForm.name,
+      customer_phone: buyerForm.phone,
+      customer_mail: buyerForm.email,
+      receiver_fullname: enableReciver ? receiverForm.name : buyerForm.name,
+      receiver_phone: enableReciver ? receiverForm.phone : buyerForm.phone,
+      receiver_email: enableReciver ? receiverForm.email : buyerForm.email,
+      note: buyerForm.notes,
+      address_type: (recive.type === "eco" ? "pickup" : "delivery") as AddressType,
+      customer_address: recive.address ?? "",
+      province_id: recive.selectedProvince.id,
+      province_name: recive.selectedProvince.name,
+      ward_id: recive.selectedWard.id,
+      ward_name: recive.selectedWard.name,
+      erp_province_id: recive.selectedProvince.id,
+      erp_ward_id: recive.selectedWard.id,
+      warehouse: '',
+      payment_type: paymentType,
+      invoicing: enableExport,
+      invoice_company: exportForm.companyName,
+      invoice_taxcode: exportForm.taxCode,
+      invoice_address: exportForm.address,
+      summary: { 
+        payment: summary.payment, 
+        shippingFee: ship,
+        discounted: summary.discounted,
+        total: summary.payment + ship,
+        orderPreDiscount: summary.subtotal,
+        saved: summary.totalDiscount,
+        orderValue: summary.subtotal,
+        totalPointUse: 0,
+      },
+      products: items.map((item) => ({ 
+        id: String(item.product.id), 
+        quantity: item.quantity,
+        comboProducts: [],
+        product_type: item.product.product_type,
+        product_code: item.product.product_code,
+        promotion_id: '',
+        autoReplen: '',
+        estimated_point: null,
+      })),
+      source: '',
+      payment_status: '',
+      url_order: '',
+      invoiceInfo: {
+        isInvoiceRequested: false,
+        type: null,
+        fullName: "",
+        phoneNumber: "",
+        personalTaxOrCCCD: "",
+        address: "",
+        companyName: exportForm.companyName,
+        taxCode: exportForm.taxCode,
+        invoiceEmail: exportForm.address
+      },
+      customer_full_address: '',
+      pickup_address: {
+        address: recive.address || '',
+        province_id: recive.selectedProvince.id,
+        province_name: recive.selectedProvince.name,
+        ward_id: recive.selectedWard.id,
+        ward_name: recive.selectedWard.name,
+        erp_province_id: recive.selectedProvince.id,
+        erp_ward_id: recive.selectedWard.id,
+        full_address: [
+          recive.address,
+          recive.selectedWard.name,
+          recive.selectedProvince
+        ].join(', '),
+      },
+      pickup_full_address: [
+        recive.address,
+        recive.selectedWard.name,
+        recive.selectedProvince
+      ].join(', '),
+      estimated_delivery: '',
+      isTaxIssued: false,
+      vouchers: [],
+      shipping_type: recive.type === 'customer' ? 'viettle_post' : 'eco',
+      totalAmountDiscount: summary.totalDiscount,
+      finalAmount: summary.payment + ship,
+      otp: otp,
+      otp_phone: buyerForm.phone,
+    };
+    const result = await createOrder({
+      form: body,
+      callback: (order) => {
+        navigate("/")
+        clearCart();
+        // navigate("/orders/" + order.code)
+      }
+    });
+    if (!result.success) {
+      console.log(result);
+      return;
+    }
+    setShowOtpModal(false)
+  };
+  const createOtpCheckout = async () => {
+    await prepareCreateOrder()
+    setShowOtpModal(true);
   }
+  const handleOtpConfirm = async (otp: string) => {
+    handleCheckout(otp)
+  }
+  const fee = getDeliveryFee()
   return (
     <div className="pt-2">
       <HorizontalDivider />
@@ -124,7 +248,20 @@ export default function CheckoutPage() {
           <Radio.Group
             className="mt-2 flex flex-col gap-2"
             onChange={(x) => {
-              // setRecive(String(x))
+              switch (String(x)) {
+                case "1":
+                  setPaymentType("recieve");
+                  break;
+                case "2":
+                  setPaymentType("domestic_card");
+                  break;
+                case "3":
+                  setPaymentType("transfer");
+                  break;
+                case "4":
+                  setPaymentType("international_card");
+                  break;
+              }
             }}
             defaultValue="1"
             options={[
@@ -175,7 +312,7 @@ export default function CheckoutPage() {
                   Giá trị đơn hàng
                 </div>
                 <div>
-                  {formatPrice(totalPrice)}
+                  {formatPrice(summary.subtotal)}
                 </div>
               </div>
               <div className="flex items-center justify-between w-full my-1 mt-4 border-b border-dashed pb-1">
@@ -183,7 +320,7 @@ export default function CheckoutPage() {
                   Phí vận chuyển
                 </div>
                 <div>
-                  {formatPrice(10000)}
+                  {formatPrice(fee)}
                 </div>
               </div>
               <div className="flex items-center justify-between w-full my-1 mt-4 border-b border-dashed pb-1">
@@ -202,10 +339,10 @@ export default function CheckoutPage() {
                   <TextInput
                     placeHolder="Nhập mã mua hàng (mã giảm giá)"
                     title=""
-                    value=""
-                    onChange={() => { }}
+                    value={voucher}
+                    onChange={(x) => setVoucher(x)}
                   />
-                  <Button className="w-[150px] line text-[12px]" primary>
+                  <Button onClick={handleApplyVoucher} className="w-[150px] line text-[12px]" primary>
                     Áp dụng
                   </Button>
                 </div>
@@ -216,7 +353,7 @@ export default function CheckoutPage() {
                 Thanh toán
               </div>
               <div className="font-[900] text-xl">
-                {formatPrice(totalPrice + 10000)}
+                {formatPrice(summary.payment + fee)}
               </div>
             </div>
           </div>
@@ -224,10 +361,17 @@ export default function CheckoutPage() {
       </CollapseView>
       <HorizontalDivider />
       <div className="w-full my-4 px-4">
-        <Button primary className="w-full font-[900] text-xl">
+        <Button primary className="w-full font-[900] text-xl" onClick={createOtpCheckout}>
             XÁC NHẬN THANH TOÁN
         </Button>
       </div>
+      <OtpOrderModal
+        open={showOtpModal}
+        phone={buyerForm.phone}
+        loading={loading}
+        onClose={() => setShowOtpModal(false)}
+        onConfirm={handleOtpConfirm}
+      />
     </div>
   );
 }

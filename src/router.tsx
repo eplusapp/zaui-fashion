@@ -10,6 +10,7 @@ import { createBrowserRouter } from "react-router-dom";
 import { getBasePath } from "@/utils/zma";
 import OrderPage from "./pages/order";
 import CheckoutPage from "./pages/checkout";
+import OrderDetailPage from "./pages/order/order-detail";
 
 const router = createBrowserRouter(
   [
@@ -51,6 +52,13 @@ const router = createBrowserRouter(
           element: <OrderPage />,
           handle: {
             title: "Đơn hàng",
+          },
+        },
+        {
+          path: "/orders/:id",
+          element: <OrderDetailPage />,
+          handle: {
+            title: "Chi tiết đơn hàng",
           },
         },
         {
