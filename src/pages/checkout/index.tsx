@@ -11,7 +11,7 @@ import { Radio } from "zmp-ui";
 import Button from "@/components/button";
 import { formatPrice } from "@/utils/format";
 import CheckoutLocation from "@/components/modals/checkout-location";
-import { AddressType, PaymentType } from "@/types/order";
+import { AddressType, CreateOrderBody, PaymentType } from "@/types/order";
 import { useCreateOrder } from "@/hook/useCreateOrder";
 import OtpOrderModal from "@/components/modals/otp-order-modal";
 import { useNavigate } from "react-router-dom";
@@ -171,11 +171,14 @@ export default function CheckoutPage() {
       finalAmount: summary.payment + ship,
       otp: otp,
       otp_phone: buyerForm.phone,
-    };
+    } as any as CreateOrderBody;
     const result = await createOrder({
       form: body,
-      callback: (order) => {
-        navigate("/")
+      callback: (code) => {
+        navigate(`/orders/${code}`)
+        toast.success(`Đặt hàng thành công!, Mã đơn hàng: ${code}`, {
+          icon: "🎉",
+        });
         clearCart();
         // navigate("/orders/" + order.code)
       }
@@ -187,6 +190,18 @@ export default function CheckoutPage() {
     setShowOtpModal(false)
   };
   const createOtpCheckout = async () => {
+    if (!buyerForm.name || !buyerForm.phone) {
+      toast.error('Vui lòng nhập tên người mua')
+      return
+    }
+    if (!recive?.selectedProvince?.id || !recive?.selectedWard?.id) {
+      toast.error('Vui lòng chọn địa chỉ giao hàng')
+      return
+    }
+    if (!paymentType) {
+      toast.error('Vui lòng chọn phương thức thanh toán')
+      return
+    }
     await prepareCreateOrder()
     setShowOtpModal(true);
   }
@@ -213,8 +228,8 @@ export default function CheckoutPage() {
         title="Thông tin người mua"
       >
         <div className="w-full gap-4 flex flex-col my-4">
-          <TextInput title="Họ và tên người mua" value={buyerForm.name} onChange={(value) => setBuyerForm({...buyerForm, name: value})} placeHolder="Nhập họ và tên người mua"/>
-          <TextInput title="Số điện thoại" value={buyerForm.phone} onChange={(value) => setBuyerForm({...buyerForm, phone: value})} placeHolder="Nhập số điện thoại"/>
+          <TextInput isRequired title="Họ và tên người mua" value={buyerForm.name} onChange={(value) => setBuyerForm({...buyerForm, name: value})} placeHolder="Nhập họ và tên người mua"/>
+          <TextInput isRequired title="Số điện thoại" value={buyerForm.phone} onChange={(value) => setBuyerForm({...buyerForm, phone: value})} placeHolder="Nhập số điện thoại"/>
           <TextInput title="Email" value={buyerForm.email} onChange={(value) => setBuyerForm({...buyerForm, email: value})} placeHolder="Nhập email"/>
           <div className="flex items-center">
             <Checkbox
@@ -224,8 +239,8 @@ export default function CheckoutPage() {
             <div className="ml-2 text-base text-gray-500">Thông tin người nhận khác với thông tin người mua</div>
           </div>
           {enableReciver && <>
-            <TextInput title="Họ và tên người nhận" value={receiverForm.name} onChange={(value) => setReceiverForm({...receiverForm, name: value})} placeHolder="Nhập họ và tên người nhận"/>
-            <TextInput title="Số điện thoại người nhận" value={receiverForm.phone} onChange={(value) => setReceiverForm({...receiverForm, phone: value})} placeHolder="Nhập số điện thoại người nhận"/>
+            <TextInput isRequired title="Họ và tên người nhận" value={receiverForm.name} onChange={(value) => setReceiverForm({...receiverForm, name: value})} placeHolder="Nhập họ và tên người nhận"/>
+            <TextInput isRequired title="Số điện thoại người nhận" value={receiverForm.phone} onChange={(value) => setReceiverForm({...receiverForm, phone: value})} placeHolder="Nhập số điện thoại người nhận"/>
             <TextInput title="Email người nhận" value={receiverForm.email} onChange={(value) => setReceiverForm({...receiverForm, email: value})} placeHolder="Nhập email người nhận"/>
           </>}
           <TextArea title="Ghi chú" value={buyerForm.notes} onChange={(value) => setBuyerForm({...buyerForm, notes: value})} placeHolder="Nhập ghi chú cho đơn hàng"/>

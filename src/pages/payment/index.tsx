@@ -12,17 +12,15 @@ import {
 import { useNavigate } from "react-router-dom";
 import { bestSaleProductsState, productsState } from "@/request/product";
 import { Product } from "@/types/products";
-import { ordersState } from "@/request/order";
-import OrderItem from "./order-item";
-export default function OrderPage() {
-  const navigate = useNavigate();
-  const [orders, setOrders] = useAtom(ordersState);
+type Props = {
+  searchResult: Product[];
+};
+
+export default function PaymentPage() {
+
   return (
     <div className="py-2">
-      <SearchBar />
-      {orders.map(x => {
-        return <OrderItem order={x} key={x.code}/>
-      })}
+
     </div>
   );
 }

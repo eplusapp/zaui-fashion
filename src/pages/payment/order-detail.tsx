@@ -9,20 +9,21 @@ import {
   keywordState,
   recommendedProductsState,
 } from "@/state";
-import { useNavigate } from "react-router-dom";
-import { bestSaleProductsState, productsState } from "@/request/product";
+import { useNavigate, useParams } from "react-router-dom";
+import { bestSaleProductsState, getOrderState, productsState } from "@/request/product";
 import { Product } from "@/types/products";
-import { ordersState } from "@/request/order";
-import OrderItem from "./order-item";
-export default function OrderPage() {
-  const navigate = useNavigate();
-  const [orders, setOrders] = useAtom(ordersState);
+type Props = {
+  searchResult: Product[];
+};
+
+export default function OrderDetailPage() {
+  const { id } = useParams();
+  const orderState = useAtomValue(getOrderState({ code: String(id) }));
+  console.log("🚀 ~ OrderDetailPage ~ orderState:", orderState)
+
   return (
     <div className="py-2">
-      <SearchBar />
-      {orders.map(x => {
-        return <OrderItem order={x} key={x.code}/>
-      })}
+
     </div>
   );
 }

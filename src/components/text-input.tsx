@@ -5,14 +5,16 @@ export interface TextInputProps {
   title: string;
   placeHolder?: string;
   value: string;
+  isRequired?: Boolean;
   onChange: (value: string) => void;
 }
 
 export default function TextInput(props: TextInputProps) {
+  const { isRequired  = false} = props 
   return (
     <div className="flex flex-col gap-1 w-full">
       {props.title && <div className="text-base font-medium text-gray-700">
-        <span className="text-danger">*</span>{props.title}
+        {props.title}{isRequired ? <span className="text-danger">*</span> : <></>}
       </div>}
      
       <input

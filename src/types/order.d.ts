@@ -127,7 +127,7 @@ export interface CheckoutForm extends Omit<
 export interface CreateOrderRequest extends CreateOrderBody {}
 
 export interface CreateOrderResponse {
-  data: any
+  data: any;
 }
 export type CreateOrderResult =
   | {
@@ -140,3 +140,92 @@ export type CreateOrderResult =
       phone?: string;
       error?: unknown;
     };
+export interface OrderCostItem {
+  amount: number;
+  transactionEnum: string;
+}
+
+export interface OrderCosts {
+  discount_promotion: OrderCostItem;
+  discount_amount: OrderCostItem;
+  order_total: OrderCostItem;
+  collectible_amount: OrderCostItem;
+}
+
+export interface OrderAddress {
+  receiver_fullname: string;
+  receiver_phone: string;
+  receiver_email: string | null;
+  receiver_address: string;
+  province_id: string;
+  province_name: string;
+  district_id: string;
+  district_name: string | null;
+  ward_id: string;
+  ward_name: string;
+  type: string;
+  source_address: string | null;
+}
+
+export interface OrderProduct {
+  id: string;
+  promotion_name: string | null;
+  promotion_id: string | null;
+  product_id: string;
+  product_name: string;
+  product_code: string;
+  product_type: string;
+  quantity: number;
+  unit_price: string;
+  burn_point: number | null;
+  estimated_point: number | null;
+  original_price: string;
+}
+
+export interface Order {
+  vouchers: Record<string, unknown>;
+
+  id: string;
+  code: string;
+
+  customer_firstname: string;
+  customer_lastname: string;
+  customer_fullname: string;
+  customer_phone: string;
+  customer_mail: string | null;
+
+  payment_type: string;
+  payment_name: string | null;
+  payment_status: string;
+
+  note: string | null;
+
+  source: string;
+  status: string;
+
+  shipping_type: string;
+  address_type: string;
+
+  cancel_reason: string | null;
+
+  created_at: string;
+  updated_at: string;
+  estimated_delivery: string;
+
+  costs: OrderCosts;
+
+  invoice_company: string;
+  invoice_no: string | null;
+  invoice_tax_code: string;
+  invoice_address: string;
+
+  available_point: number;
+  remain_point: number;
+
+  is_eco: boolean;
+  is_tax_issued: boolean;
+
+  address: OrderAddress;
+
+  products: OrderProduct[];
+}

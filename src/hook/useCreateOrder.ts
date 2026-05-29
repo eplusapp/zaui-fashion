@@ -10,6 +10,8 @@ import {
 } from "@/types/order";
 import { createOrderState, getOrderOtpState } from "@/request/product";
 import { requestWithFallback } from "@/utils/request";
+import { getConfig } from "@/utils/template";
+import { addOrderState } from "@/request/order";
 
 interface CreateOrderParams {
   form: CreateOrderBody;
@@ -20,6 +22,7 @@ interface CreateOrderParams {
 
 export const useCreateOrder = () => {
   const [loading, setLoading] = useState(false);
+  const addOrder = useSetAtom(addOrderState);
 
   const createOrderRequest = useSetAtom(createOrderState);
   const crateOrderOtpRequest = useSetAtom(getOrderOtpState);
@@ -31,23 +34,22 @@ export const useCreateOrder = () => {
     }: CreateOrderParams): Promise<CreateOrderResult> => {
       try {
         setLoading(true);
-
         const utm = JSON.parse(sessionStorage.getItem("utm") || "{}");
-
         const queryString = new URLSearchParams(utm).toString();
-
         const order = await createOrderRequest({
           ...form,
           source: "web",
           payment_status: "open",
           url_order: queryString,
         });
-        if (order?.data) {
-          
-            console.log("🚀 ~ useCreateOrder ~ form.payment_type:", form.payment_type)
-          if (form.payment_type === 'recive') {
+        if (order?.data) {   
+          addOrder(order?.data);       
+          if (
+            form.payment_type === "recieve" ||
+            form.payment_type === "transfer"
+          ) {
             if (callback) {
-              callback(order.data);
+              callback(order.data?.code);
             }
           } else {
             await handlePayment({
@@ -95,9 +97,13 @@ async function handlePayment({
   paymentType: PaymentType;
   amount: number;
 }) {
+  console.log("🚀 ~ handlePayment ~ amount:", amount)
+  console.log("🚀 ~ handlePayment ~ paymentType:", paymentType)
+  console.log("🚀 ~ handlePayment ~ order:", order)
   const referenceNumber = `${order.code}_${Date.now()}`;
-
-  const returnUrl = `${window.location.origin}/order/${order.code}`;
+  const API_URL = getConfig((config) => config.template.apiUrl);
+  
+  const returnUrl = `${API_URL}/order/${order.code}`;
 
   
   switch (paymentType) {
@@ -109,7 +115,7 @@ async function handlePayment({
           paymentUrl?: string;
         };
       }>(
-        "payment/redirect", // TODO: vnpay endpoint
+        "/payment/redirect", // TODO: vnpay endpoint
         {},
         {
           method: "POST",

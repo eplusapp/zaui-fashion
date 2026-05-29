@@ -144,6 +144,7 @@ export interface GetOrderParams {
   code: string;
 }
 export interface OrderResponse {
+  error?: string;
   code: string;
   status: string;
   payment_status: string;

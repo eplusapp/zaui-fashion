@@ -16,6 +16,9 @@ import { Product } from "@/types/products";
 import { useCart } from "@/hook/useCart";
 import ProductComboSection from "@/components/product-combo-section";
 import QuantityInput from "@/components/quantity-input";
+import { Icon } from "zmp-ui";
+import { CartIcon } from "@/components/vectors";
+import { openPhone } from "zmp-sdk";
 
 export default function ProductDetailPage() {
   const { id } = useParams();
@@ -150,11 +153,30 @@ export default function ProductDetailPage() {
       </div>
 
       <HorizontalDivider />
-      <div className="flex-none grid grid-cols-2 gap-2 py-3 px-4">
+      <div className="flex-none grid grid-cols-3 gap-2 py-3 px-4">
         <Button
           large
+          className="px-0 py-0"
           onClick={() => {
-            if(!selectedProduct && product.brand !== "COMBO") {
+            openPhone({
+              phoneNumber: "0869896089",
+            });
+          }}
+        >
+          <div className="w-full flex flex-col items-center">
+            <Icon
+              icon="zi-call"
+            />
+            <div className="w-full">
+              Gọi mua hàng
+            </div>
+          </div>
+        </Button>
+        <Button
+          className="px-0 py-0"
+          large
+          onClick={() => {
+            if (!selectedProduct && product.brand !== "COMBO") {
               toast.error("Vui lòng chọn loại sản phẩm");
               return;
             }
@@ -165,11 +187,17 @@ export default function ProductDetailPage() {
             }
           }}
         >
-          Thêm vào giỏ
+          <div className="w-full flex flex-col items-center">
+            <CartIcon />
+            <div className="w-full">
+              Thêm vào giỏ
+            </div>
+          </div>
         </Button>
         <Button
           large
           primary
+          className="px-0 py-0"
           onClick={() => {
             if (!selectedProduct && product.brand !== "COMBO") {
               toast.error("Vui lòng chọn loại sản phẩm");
@@ -183,7 +211,9 @@ export default function ProductDetailPage() {
             navigate("/check-out");
           }}
         >
-          Mua ngay
+          <div className="text-lg font-bold">
+            Mua ngay
+          </div>
         </Button>
       </div>
     </div>
