@@ -6,9 +6,9 @@ import {
   useParams,
 } from "react-router-dom";
 import { formatPrice } from "@/utils/format";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import toast from "react-hot-toast";
-import { productDetailState } from "@/request/product";
+import { flashSaleSettingState, productDetailState } from "@/request/product";
 import Carousel from "@/components/carousel";
 import RelatedProducts from "./related-products";
 import ProductSectionsRenderer from "@/components/product-detail-section";
@@ -19,6 +19,8 @@ import QuantityInput from "@/components/quantity-input";
 import { Icon } from "zmp-ui";
 import { CartIcon, EmptyBoxIcon } from "@/components/vectors";
 import { openPhone } from "zmp-sdk";
+import IcLight from "@/static/icon/light.png";
+import Countdown from "@/components/countdown";
 
 export default function ProductDetailPage() {
   const { id } = useParams();
@@ -26,7 +28,13 @@ export default function ProductDetailPage() {
   const product = useAtomValue(productDetailState(String(id)))!;
   const [selectedProduct, setSelectedProduct] = useState<Product>();
   const [quantity, setQuantity] = useState(1);
+  const setting = useAtomValue(flashSaleSettingState);
+  const listVariant = product?.sku_related?.filter(x => x.sell_on?.includes("Web Ecogreen") && x?.brand !== "COMBO")
 
+  useEffect(() => {
+    setSelectedProduct(listVariant?.[0])
+  }, [product?.id, listVariant?.length])
+  
   const [tab, setTab] = useState<
     'detail' | 'ingredients'
   >('detail');
@@ -44,7 +52,6 @@ export default function ProductDetailPage() {
   const { addToCart, buyNow } = useCart();
 
   const renderVariant = () => {
-    const listVariant = product?.sku_related?.filter(x => x.sell_on?.includes("Web Ecogreen") && x?.brand !== "COMBO")
     if (product?.brand === "COMBO") {
       return null;
     }
@@ -101,6 +108,47 @@ export default function ProductDetailPage() {
   } 
   const realPrice = selectedProduct ? selectedProduct?.discount_price || selectedProduct.original_price : product?.discount_price || product?.original_price
   const oldPrice = selectedProduct ? selectedProduct.original_price : product?.original_price
+  const renderPriceFlashSale = () => {
+    if (product?.is_flash_sale && product.flash_sale_price && product?.flash_sale_remaining_quantity > 0 && setting?.end_time) {
+      return <div className="bg-primary-eco-blue rounded-lg overflow-hidden flex flex-col">
+        <div className="flex flex-1 py-3 px-2 items-center justify-between">
+          <div className="flex">
+            <img src={IcLight} className="w-6 h-6" />
+            <p className="text-white font-[800] text-lg">Giá tốt tại Flash Sale</p>
+          </div>
+          <Countdown endTime={setting?.end_time} />
+        </div>
+        <div className="flex flex-1 bg-[#EAECF5] py-3 px-2 items-center  gap-2">
+          <p className="text-[#858585] font-[400] text-sm line-through">{formatPrice(Number(oldPrice))}</p>
+          <p className="text-[#0F4C8D] font-[700] text-[20px]">{formatPrice(Number(selectedProduct?.flash_sale_price || realPrice))}</p>
+        </div>
+      </div>
+    }
+    return <></>
+  }
+  
+  const renderPrice = () => {
+    if (!setting?.active || !product?.is_flash_sale) {
+      return <>
+        {oldPrice === realPrice ? <>
+          {!!product?.original_price && (
+            <div className="text-[24px] font-[700] text-primary">
+              {formatPrice(Number(oldPrice))}
+            </div>
+          )}</> : <>
+          <div className="text-[24px] font-[700] text-primary">
+            {formatPrice(Number(realPrice))}
+          </div>
+          {!!product?.original_price && (
+            <div className="text-[18px] text-subtitle line-through">
+              {formatPrice(Number(oldPrice))}
+            </div>
+          )}</>}
+      </>
+    }
+    return <></>
+  }
+
   if (!product) {
     return <div className="w-full h-full flex flex-col items-center justify-center">
       <EmptyBoxIcon/>
@@ -122,21 +170,11 @@ export default function ProductDetailPage() {
             />
           </div>
           {renderVariant()} 
-          {oldPrice === realPrice ? <>
-            {!!product?.original_price && (
-              <div className="text-[24px] font-[700] text-primary">
-                {formatPrice(Number(oldPrice))}
-              </div>
-            )}</> : <>
-            <div className="text-[24px] font-[700] text-primary">
-              {formatPrice(Number(oldPrice))}
-            </div>
-            {!!product?.original_price && (
-              <div className="text-[18px] text-subtitle line-through">
-                {formatPrice(Number(realPrice))}
-              </div>
-            )}</>}
-         
+          {renderPrice()}
+          
+          <div className="pt-2">
+            {renderPriceFlashSale()}
+          </div>
           <div className="pt-2">
             <QuantityInput
               value={quantity}
@@ -184,7 +222,7 @@ export default function ProductDetailPage() {
             <Icon
               icon="zi-call"
             />
-            <div className="w-full">
+            <div className="w-full text-[12px] font-[600]">
               Gọi mua hàng
             </div>
           </div>
@@ -206,7 +244,7 @@ export default function ProductDetailPage() {
         >
           <div className="w-full flex flex-col items-center">
             <CartIcon />
-            <div className="w-full">
+            <div className="w-full text-[12px] font-[600]">
               Thêm vào giỏ
             </div>
           </div>

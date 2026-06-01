@@ -9,7 +9,7 @@ import TextArea from "@/components/text-area";
 import Checkbox from "@/components/checkbox";
 import { Radio } from "zmp-ui";
 import Button from "@/components/button";
-import { formatPrice } from "@/utils/format";
+import { formatPrice, safeJsonParse } from "@/utils/format";
 import CheckoutLocation from "@/components/modals/checkout-location";
 import { AddressType, CreateOrderBody, PaymentType } from "@/types/order";
 import { useCreateOrder } from "@/hook/useCreateOrder";
@@ -21,6 +21,7 @@ import toast from "react-hot-toast";
  
 export default function CheckoutPage() {
   const { items, totalPrice, summary, clearBuyNow, clearCart } = useCart();
+  console.log("🚀 ~ CheckoutPage ~ items:", items)
   const [paymentType, setPaymentType] = useState<PaymentType>("recieve");
   const navigate = useNavigate();
   const [voucher, setVoucher] = useState('')
@@ -62,17 +63,21 @@ export default function CheckoutPage() {
     return 10000
   }
   const handleApplyVoucher = async () => {
-    const result = await checkVoucher({
-      phone: buyerForm.phone,
-      voucherCode: voucher,
-    });
-    if((result as any).error) {
-      toast.error((result as any).message);
-    } else {
-      if (result.data) {
-        setVoucherList([...voucherList, result.data])
+    try {
+      const result = await checkVoucher({
+        phone: buyerForm.phone,
+        voucherCode: voucher,
+      });
+      if ((result as any).error) {
+        toast.error((result as any).message);
+      } else {
+        if (result.data) {
+          setVoucherList([...voucherList, result.data])
+        }
+        toast.success('Thêm voucher thành công')
       }
-      toast.success('Thêm voucher thành công')
+    } catch (error) {
+      toast.error((error as any));
     }
   };
   const handleCheckout = async (otp: string) => {
@@ -118,7 +123,10 @@ export default function CheckoutPage() {
       products: items.map((item) => ({ 
         id: String(item.product.id), 
         quantity: item.quantity,
-        comboProducts: [],
+        comboProducts: safeJsonParse(
+          item.product.comboProducts,
+          [],
+        ),
         product_type: item.product.product_type,
         product_code: item.product.product_code,
         promotion_id: '',

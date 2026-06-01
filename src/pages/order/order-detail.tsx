@@ -16,7 +16,6 @@ export default function OrderDetailPage() {
   const { id } = useParams();
   const [orders] = useAtom(ordersState);
   const order = orders.find(x => x.code === id)
-  console.log("🚀 ~ OrderDetailPage ~ order:", order)
   const navigate = useNavigate()
   const continuteShop = () => {
     navigate("/")
@@ -66,12 +65,15 @@ export default function OrderDetailPage() {
       return lengthGift > 0 && lengthProduct === 0
     } else return false
   }
+  const isWithin24Hours = order?.created_at
+    ? moment().diff(moment(order.created_at), "hours", true) < 24
+    : false;
   if (!order) return <div className="flex flex-1 items-center justify-center h-full">
     <EmptyBoxIcon />
   </div>
   return (
     <div className="py-2 px-4 mt-2 bg-[#FBFBFE] overflow-y-auto">
-      {order.payment_status === 'open' && !checkGift() && <div className="w-full items-center flex flex-col py-3 px-4" style={{ backgroundColor: '#F7941D' }}>
+      {order.payment_status === 'open' && isWithin24Hours && !checkGift() && <div className="w-full items-center flex flex-col py-3 px-4" style={{ backgroundColor: '#F7941D' }}>
         <div className="text-white font-[800] text-lg">Đang chờ thanh toán</div>
         <div className="text-white font-[600] text-lg text-center">Quý khách vui lòng thanh toán đơn hàng trong vòng 24h.</div>
       </div>}

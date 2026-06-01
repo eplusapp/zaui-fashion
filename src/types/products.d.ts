@@ -135,6 +135,7 @@ export interface Product {
   id?: string;
   name: string;
   description: string;
+  comboProducts: string;
   original_price: string | number;
   discount_price: number;
   is_flash_sale: boolean;
