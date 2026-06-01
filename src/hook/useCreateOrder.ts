@@ -38,12 +38,15 @@ export const useCreateOrder = () => {
         const queryString = new URLSearchParams(utm).toString();
         const order = await createOrderRequest({
           ...form,
-          source: "web",
+          source: "Zaloshop",
           payment_status: "open",
           url_order: queryString,
         });
         if (order?.data) {   
-          addOrder(order?.data);       
+          addOrder({
+            ...order?.data,
+            estimated_delivery: form.estimated_delivery,
+          });       
           if (
             form.payment_type === "recieve" ||
             form.payment_type === "transfer"

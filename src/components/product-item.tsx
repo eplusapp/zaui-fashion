@@ -65,12 +65,13 @@ export default function ProductItem(props: ProductItemProps) {
             </div>
             <div className="flex w-full items-center justify-between pt-2 px-2">
               <div className="w-full flex items-start flex-col">
-                <div className="text-sm font-[700] text-[#1E266E] mt-1 ">
+                <div className="text-lg font-[700] text-[#1E266E] mt-1 ">
                   {formatPrice(Number(props.product.discount_price))}
                 </div>
-                <div className="text-3xs text-subtitle line-through mt-0.5">
+                {discount && <div className="text-3xs text-subtitle line-through mt-0.5">
                   {formatPrice(Number(props.product.original_price))}
-                </div>
+                </div>}
+                
               </div>
               <div onClick={e => {
                 e.preventDefault();

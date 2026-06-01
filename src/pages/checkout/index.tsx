@@ -28,6 +28,8 @@ export default function CheckoutPage() {
 
   const [enableReciver, setEnableReciver] = useState(false)
   const [enableExport, setEnableExport] = useState(false)
+  const [estimateTime, setEstimateTime] = useState<String>()
+
   const [showOtpModal, setShowOtpModal] = useState(false);
   const [recive, setRecive] = useState<ReciveType>()
   const { createOrder, prepareCreateOrder, loading } = useCreateOrder();
@@ -55,13 +57,7 @@ export default function CheckoutPage() {
     taxCode: "",
     address: "",
   })
-  // const getTotalProductWeight = ()  => {
-  //   let totalWeight = items.reduce((acc, item) => {
-  //     return acc + item.product.weight * item.quantity
-  //   }, 0)
-  //   totalWeight += 240 // 240g là trọng lượng của hộp đựng sản phẩm
-  //   return totalWeight
-  // }
+
   const getDeliveryFee = () => {
     return 10000
   }
@@ -155,15 +151,15 @@ export default function CheckoutPage() {
         full_address: [
           recive.address,
           recive.selectedWard.name,
-          recive.selectedProvince
+          recive.selectedProvince?.name
         ].join(', '),
       },
       pickup_full_address: [
         recive.address,
         recive.selectedWard.name,
-        recive.selectedProvince
+        recive.selectedProvince?.name
       ].join(', '),
-      estimated_delivery: '',
+      estimated_delivery: estimateTime,
       isTaxIssued: false,
       vouchers: [],
       shipping_type: recive.type === 'customer' ? 'viettle_post' : 'eco',
@@ -250,7 +246,7 @@ export default function CheckoutPage() {
       <CollapseView
         title="Hình thức giao hàng"
       >
-        <CheckoutLocation setRecive={setRecive} recive={recive} />
+        <CheckoutLocation setEstimateTime={setEstimateTime} setRecive={setRecive} recive={recive} />
       </CollapseView>
       <HorizontalDivider />
       <CollapseView
@@ -284,18 +280,18 @@ export default function CheckoutPage() {
                 label: 'Tiền mặt',
                 value: '1'
               },
-              {
-                label: 'Thẻ nội địa',
-                value: '2'
-              },
+              // {
+              //   label: 'Thẻ nội địa',
+              //   value: '2'
+              // },
               {
                 label: 'Chuyển khoản',
                 value: '3'
               },
-              {
-                label: 'Thẻ quốc tế',
-                value: '4'
-              }
+              // {
+              //   label: 'Thẻ quốc tế',
+              //   value: '4'
+              // }
             ]}
           />
         </div>

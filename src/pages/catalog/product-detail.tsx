@@ -17,7 +17,7 @@ import { useCart } from "@/hook/useCart";
 import ProductComboSection from "@/components/product-combo-section";
 import QuantityInput from "@/components/quantity-input";
 import { Icon } from "zmp-ui";
-import { CartIcon } from "@/components/vectors";
+import { CartIcon, EmptyBoxIcon } from "@/components/vectors";
 import { openPhone } from "zmp-sdk";
 
 export default function ProductDetailPage() {
@@ -44,8 +44,8 @@ export default function ProductDetailPage() {
   const { addToCart, buyNow } = useCart();
 
   const renderVariant = () => {
-    const listVariant = product?.sku_related?.filter(x => x.sell_on?.includes("Web Ecogreen") && x.brand !== "COMBO")
-    if (product.brand === "COMBO") {
+    const listVariant = product?.sku_related?.filter(x => x.sell_on?.includes("Web Ecogreen") && x?.brand !== "COMBO")
+    if (product?.brand === "COMBO") {
       return null;
     }
     return <div className={`flex gap-4 flex-wrap mt-4 mb-2`}>
@@ -63,7 +63,7 @@ export default function ProductDetailPage() {
     </div>
   }
   const renderTab = () => {
-    if (product.brand === "COMBO") {
+    if (product?.brand === "COMBO") {
       return <ProductComboSection record={product} />
     }
     return (
@@ -93,12 +93,22 @@ export default function ProductDetailPage() {
           })}
         </div>
         <div className="p-4">
-          {tab === 'detail' && <ProductSectionsRenderer data={product.product_detail} />}
-          {tab === 'ingredients' && <ProductSectionsRenderer data={product.product_detail} only={['ingredients']} />}
+          {tab === 'detail' && <ProductSectionsRenderer data={product?.product_detail} />}
+          {tab === 'ingredients' && <ProductSectionsRenderer data={product?.product_detail} only={['ingredients']} />}
         </div>
       </div>
     )
   } 
+  const realPrice = selectedProduct ? selectedProduct?.discount_price || selectedProduct.original_price : product?.discount_price || product?.original_price
+  const oldPrice = selectedProduct ? selectedProduct.original_price : product?.original_price
+  if (!product) {
+    return <div className="w-full h-full flex flex-col items-center justify-center">
+      <EmptyBoxIcon/>
+      <div className="text-[24px] font-[700] text-[#646464]">
+        Không tìm thấy sản phẩm
+      </div>
+    </div>  
+  }
   return (
     <div className="w-full h-full flex flex-col">
       <div className="flex-1 overflow-y-auto">
@@ -112,14 +122,21 @@ export default function ProductDetailPage() {
             />
           </div>
           {renderVariant()} 
-          <div className="text-[24px] font-[700] text-primary">
-            {formatPrice(Number(product.discount_price || product.original_price))}
-          </div>
-          {!!product.original_price && (
-            <div className="text-[18px] text-subtitle line-through">
-              {formatPrice(Number(product.original_price))}
+          {oldPrice === realPrice ? <>
+            {!!product?.original_price && (
+              <div className="text-[24px] font-[700] text-primary">
+                {formatPrice(Number(oldPrice))}
+              </div>
+            )}</> : <>
+            <div className="text-[24px] font-[700] text-primary">
+              {formatPrice(Number(oldPrice))}
             </div>
-          )}
+            {!!product?.original_price && (
+              <div className="text-[18px] text-subtitle line-through">
+                {formatPrice(Number(realPrice))}
+              </div>
+            )}</>}
+         
           <div className="pt-2">
             <QuantityInput
               value={quantity}
@@ -155,7 +172,7 @@ export default function ProductDetailPage() {
       <HorizontalDivider />
       <div className="flex-none grid grid-cols-3 gap-2 py-3 px-4">
         <Button
-          large
+          small
           className="px-0 py-0"
           onClick={() => {
             openPhone({
@@ -173,10 +190,10 @@ export default function ProductDetailPage() {
           </div>
         </Button>
         <Button
+          small
           className="px-0 py-0"
-          large
           onClick={() => {
-            if (!selectedProduct && product.brand !== "COMBO") {
+            if (!selectedProduct && product?.brand !== "COMBO") {
               toast.error("Vui lòng chọn loại sản phẩm");
               return;
             }
@@ -195,11 +212,11 @@ export default function ProductDetailPage() {
           </div>
         </Button>
         <Button
-          large
           primary
+          small
           className="px-0 py-0"
           onClick={() => {
-            if (!selectedProduct && product.brand !== "COMBO") {
+            if (!selectedProduct && product?.brand !== "COMBO") {
               toast.error("Vui lòng chọn loại sản phẩm");
               return;
             }

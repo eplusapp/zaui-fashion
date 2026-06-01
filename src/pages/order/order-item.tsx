@@ -37,10 +37,10 @@ export default function OrderItem(props: Props) {
         {renderLine('Trạng thái', '#586189', `${getOrderStatus(order, !order.is_eco)}`, `${getOrderColor(order, !order.is_eco)}`, true)}
         {renderLine('Họ tên người nhận', '#586189', `${order.customer_fullname}`, '#233248')}
         {renderLine('Số di động', '#586189', `${order.customer_phone}`, '#233248')}
-        {renderLine('Địa chỉ nhận hàng', '#586189', `${[order.address.receiver_address, order.address.ward_name, order.address.province_name].join(', ')}`, '#233248')}
+        {renderLine('Địa chỉ nhận hàng', '#586189', `${[order.address?.receiver_address, order.address?.ward_name, order.address?.province_name].join(', ')}`, '#233248')}
         {renderLine('Tên công ty', '#586189', `${order.invoice_company || '-'}`, '#233248')}
         {renderLine('Mã số thuế', '#586189', `${order.invoice_tax_code || '-'}`, '#233248')}
-        {renderLine('Địa chỉ', '#586189', `${[order.address.receiver_address, order.address.ward_name, order.address.province_name].join(', ')}`, '#233248')}
+        {renderLine('Địa chỉ', '#586189', `${[order.address?.receiver_address, order.address?.ward_name, order.address?.province_name].join(', ')}`, '#233248')}
         {renderLine('Ghi chú', '#586189', `${order.note || '-'}`, '#233248')}
       </div>
     </div>

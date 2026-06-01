@@ -10,6 +10,7 @@ import { ReciveType } from "@/types/products";
 type Props = {
     recive?: ReciveType;
     setRecive: React.Dispatch<React.SetStateAction<ReciveType | undefined>>;
+    setEstimateTime: React.Dispatch<React.SetStateAction<String | undefined>>
 }
 const ecoAddress = [{
     address: '180 Trường Chinh',
@@ -37,7 +38,7 @@ const ecoAddress = [{
     erp_ward_id: '26983'
 }]
 export default function CheckoutLocation(props: Props) {
-    const { recive, setRecive } = props;
+    const { recive, setRecive, setEstimateTime } = props;
     const [open, setOpen] = useState(false);
     const provinces = useAtomValue(provincesState({}));
  
@@ -66,14 +67,17 @@ export default function CheckoutLocation(props: Props) {
 
     const getTimeDelivery = () => {
         const now = new Date();
+        let time: String | undefined = undefined
         if (timeReciver?.items && timeReciver?.items?.length > 0) {
             const deliveryDate = new Date(now);
             deliveryDate.setDate(
                 deliveryDate.getDate() + Number(timeReciver?.items?.[0]?.daysToShip),
             );
-            return deliveryDate.toLocaleDateString("vi-VN");
+            time = deliveryDate.toLocaleDateString("vi-VN");
         }
-        return now.toLocaleDateString("vi-VN");
+        time = now.toLocaleDateString("vi-VN");
+        setEstimateTime(time)
+        return time
     };
 
     useEffect(() => {
@@ -162,7 +166,7 @@ export default function CheckoutLocation(props: Props) {
                     ))}
                 </select>
             </div>
-            <TextInput title="Địa chỉ" value={String(recive?.address)} onChange={(value) => {
+            <TextInput title="Địa chỉ" value={String(recive?.address || '')} onChange={(value) => {
                 setRecive({
                     ...recive,
                     type: recive?.type || "customer",
@@ -219,7 +223,6 @@ export default function CheckoutLocation(props: Props) {
                         })
                         setOpen(true)
                     }}
-                    defaultValue="customer"
                     options={[
                         {
                             label: 'Giao hàng tận nơi',

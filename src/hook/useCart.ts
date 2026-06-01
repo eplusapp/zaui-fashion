@@ -271,7 +271,8 @@ export function useCart() {
 
 
   const summary = useMemo(() => {
-    const promotion = getPromotionPrice(checkoutItems, false);
+    const promotion = 0; 
+    // getPromotionPrice(checkoutItems, false);
     const summary = calculateSummary(checkoutItems);
     return {
       ...calculateSummary(checkoutItems),

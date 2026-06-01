@@ -97,10 +97,10 @@ export default function OrderDetailPage() {
         {renderLine('Trạng thái', '#586189', `${getOrderStatus(order, !order?.is_eco)}`, `${getOrderColor(order, !order?.is_eco)}`, true)}
         {renderLine('Họ tên người nhận', '#586189', `${order?.customer_fullname}`, '#233248')}
         {renderLine('Số di động', '#586189', `${order?.customer_phone}`, '#233248')}
-        {renderLine('Địa chỉ nhận hàng', '#586189', `${[order?.address.receiver_address, order?.address.ward_name, order?.address.province_name].join(', ')}`, '#233248')}
+        {renderLine('Địa chỉ nhận hàng', '#586189', `${[order?.address?.receiver_address, order?.address?.ward_name, order?.address?.province_name].join(', ')}`, '#233248')}
         {renderLine('Tên công ty', '#586189', `${order?.invoice_company || '-'}`, '#233248')}
         {renderLine('Mã số thuế', '#586189', `${order?.invoice_tax_code || '-'}`, '#233248')}
-        {renderLine('Địa chỉ', '#586189', `${[order?.address.receiver_address, order?.address.ward_name, order?.address.province_name].join(', ')}`, '#233248')}
+        {renderLine('Địa chỉ', '#586189', `${[order?.address?.receiver_address, order?.address?.ward_name, order?.address?.province_name].join(', ')}`, '#233248')}
         {renderLine('Ghi chú', '#586189', `${order?.note || '-'}`, '#233248')}
         {renderLine('Điểm dự kiến', '#586189', `${order?.available_point}`, '#233248')}
         {renderLine('Điểm còn lại', '#586189', `${order?.remain_point}`, '#233248')}
@@ -116,7 +116,7 @@ export default function OrderDetailPage() {
           {renderLine('Số tiền', '#586189', `${formatPrice(order?.costs.collectible_amount?.amount)}`, '#1E266E', true)}
           <div className="flex">
             <div style={{ color: '#586189' }} className={`font-[400] flex-1 text-md`}>
-              {'Số tài khoả'}
+              {'Số tài khoản'}
             </div>
             <div onClick={() => copyText('0000041197357')} style={{ color: '#233248' }} className={`font-[700] flex-1 text-md`}>
               {'0000041197357'}
