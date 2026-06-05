@@ -23,6 +23,9 @@ export async function request<T>(
     headers: {
       "Content-Type": "application/json",
       Accept: "application/json",
+      // "x-real-ip": "",
+      // "csrf-token": "",
+      // "csrf-secret": "",
       ...(options?.headers || {}),
     },
   });

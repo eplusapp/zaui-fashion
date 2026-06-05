@@ -38,7 +38,7 @@ export const useCreateOrder = () => {
         const queryString = new URLSearchParams(utm).toString();
         const order = await createOrderRequest({
           ...form,
-          source: "ZaloShop",
+          source: "web",
           payment_status: "open",
           url_order: queryString,
         });

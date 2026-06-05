@@ -1,9 +1,11 @@
+import deepEqual from "fast-deep-equal";
 import { Order, OrderProduct, PromotionResponse } from "@/types/order";
 import { atom } from "jotai";
-import { atomWithStorage, unwrap } from "jotai/utils";
+import { atomFamily, atomWithStorage, unwrap } from "jotai/utils";
 import { nativeStorage } from "zmp-sdk/apis";
 import { requestWithFallback } from "@/utils/request";
 import { buyNowState, cartState } from "./cart";
+import { decrypt } from "@/utils/format";
 
 const zaloStorage = {
   getItem: (key: string) => {
@@ -79,13 +81,10 @@ export const clearOrdersState = atom(null, (_, set) => {
   set(ordersState, []);
 });
 
- 
-
 export const promotionState = atom(async (get) => {
   const cart = get(cartState);
   const buyNowItem = get(buyNowState);
   const items = buyNowItem ? [buyNowItem] : cart.items;
-
 
   if (!items.length) {
     return null;
@@ -139,4 +138,49 @@ export const promotionState = atom(async (get) => {
 export const promotionDataState = unwrap(
   promotionState,
   (prev) => prev ?? null,
+);
+
+interface OrderDetailParams {
+  phone: string;
+  code: string;
+}
+
+export const orderDetailState = atomFamily(
+  (params: OrderDetailParams) =>
+    atom(async () => {
+      const { phone, code } = params;
+
+      if (!phone || !code) {
+        return null;
+      }
+      const _getCfrs = await requestWithFallback<any>(
+        `/api/auth/csrf-token`,
+        null,
+        {
+          method: "GET",
+        },
+      );
+      const _deScript = decrypt(_getCfrs);
+
+      const res = await requestWithFallback<any>(
+        `/api/order/by-phone?phone=${phone}&page=1&limit=10&code=${code}`,
+        null,
+        {
+          method: "GET",
+          headers: {
+            "csrf-token": _deScript.token,
+            "csrf-secret": _deScript.secret,
+          },
+        },
+      );
+
+      return res?.data?.[0] ?? res?.orders?.[0] ?? null;
+    }),
+  deepEqual,
+);
+
+export const orderDetailDataState = atomFamily(
+  (params: OrderDetailParams) =>
+    unwrap(orderDetailState(params), (prev) => prev ?? null),
+  deepEqual,
 );
