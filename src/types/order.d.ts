@@ -229,3 +229,47 @@ export interface Order {
 
   products: OrderProduct[];
 }
+
+export interface PromotionResponse {
+  products: PromotionProduct[];
+  costs: PromotionCosts;
+  totalOriginalPrice: number;
+  totalDiscountPromotion: number;
+  totalDiscountVoucher: number;
+  shippingFee: number;
+  collectibleAmount: number;
+  isFirstOrder: boolean;
+}
+
+export interface PromotionProduct {
+  productId: string;
+  orderId: string | null;
+  productType: string;
+  productName: string;
+  productCode: string;
+  promotionId: string | null;
+  promotionName: string | null;
+  unitPrice: number;
+  burnPoint: number | null;
+  estimatedPoint: number | null;
+  quantity: number;
+  originalPrice: number;
+  autoReplen: string | null;
+  brand: string;
+}
+
+export interface PromotionCosts {
+  discount_promotion: PromotionCostItem;
+  discount_amount: PromotionCostItem;
+  order_total: PromotionCostItem;
+  collectible_amount: PromotionCostItem;
+}
+
+export interface PromotionCostItem {
+  amount: number;
+  transactionEnum:
+    | "discount_promotion"
+    | "discount_amount"
+    | "order_total"
+    | "collectible_amount";
+}

@@ -5,11 +5,12 @@ import { getUserInfo } from "zmp-sdk";
 import { PaginatedResponse } from "@/types/pagination";
 import {
   CheckVoucherBody,
-  CheckVoucherResponse,
   FlashSaleSettingRes,
   Product,
   ProductDetail,
   ProductParams,
+  VeryfiVoucherBody,
+  Voucher,
 } from "@/types/products";
 import deepEqual from "fast-deep-equal";
 import { CreateOrderBody, CreateOrderResponse } from "@/types/order";
@@ -172,9 +173,23 @@ export const getOrderState = atomFamily(
 export const checkingVoucherState = atom(
   null,
   async (_, __, body: CheckVoucherBody) => {
-    return requestWithFallback<CheckVoucherResponse>(
+    return requestWithFallback<{ message: string; success: boolean }>(
       "/api/order/checking-eco-voucher",
-      {} as CheckVoucherResponse,
+      { message: "", success: false },
+      {
+        method: "POST",
+        body: JSON.stringify(body),
+      },
+    );
+  },
+);
+
+export const verifyingVoucherState = atom(
+  null,
+  async (_, __, body: VeryfiVoucherBody) => {
+    return requestWithFallback<Voucher | null>(
+      "/api/order/verify-eco-voucher",
+      null,
       {
         method: "POST",
         body: JSON.stringify(body),

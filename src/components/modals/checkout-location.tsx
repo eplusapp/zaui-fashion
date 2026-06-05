@@ -7,6 +7,7 @@ import { deliveryTimeState, provincesState, wardsState } from "@/request/locatio
 import { unwrap } from "jotai/utils";
 import TextInput from "../text-input";
 import { ReciveType } from "@/types/products";
+import moment from "moment";
 type Props = {
     recive?: ReciveType;
     setRecive: React.Dispatch<React.SetStateAction<ReciveType | undefined>>;
@@ -66,18 +67,8 @@ export default function CheckoutLocation(props: Props) {
     }));
 
     const getTimeDelivery = () => {
-        const now = new Date();
-        let time: String | undefined = undefined
-        if (timeReciver?.items && timeReciver?.items?.length > 0) {
-            const deliveryDate = new Date(now);
-            deliveryDate.setDate(
-                deliveryDate.getDate() + Number(timeReciver?.items?.[0]?.daysToShip),
-            );
-            time = deliveryDate.toLocaleDateString("vi-VN");
-        }
-        time = now.toLocaleDateString("vi-VN");
-        setEstimateTime(time)
-        return time
+        setEstimateTime(timeReciver?.latesDeliveryDate)
+        return [timeReciver?.earliestDeliveryDate, timeReciver.latestDeliveryDate]?.filter(x => Boolean(x))?.map(x => moment(x).format('DD/MM/YYYY'))?.join(' - ')
     };
 
     useEffect(() => {
@@ -236,7 +227,7 @@ export default function CheckoutLocation(props: Props) {
                 />
             </div>
             {selectedProvinceData && selectedWardData && (
-                <div className="mt-4 rounded-xl border border-gray-200 bg-white p-4 mb-4">
+                <div className="mt-4 rounded-xl border border-gray-200 bg-white p-4 mb-4" onClick={() => setOpen(true)}>
                     <div className="text-sm text-gray-500">
                         Địa chỉ đã chọn
                     </div>

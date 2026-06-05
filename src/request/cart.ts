@@ -2,7 +2,7 @@ import { Cart, CartItem } from "@/types/cart";
 import { atomWithStorage } from "jotai/utils";
 import { nativeStorage } from "zmp-sdk/apis";
 
-const zaloStorage = {
+export const zaloStorage = {
   getItem: (key: string) => {
     try {
       const data = nativeStorage.getItem(key);

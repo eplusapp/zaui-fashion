@@ -1,5 +1,5 @@
-import { useEffect, useState } from "react";
-import { ReciveType, VoucherItem } from "@/types/products";
+import { useEffect, useMemo, useState } from "react";
+import { ReciveType, Voucher } from "@/types/products";
 import CollapseView from "@/components/collapse-view";
 import HorizontalDivider from "@/components/horizontal-divider";
 import { useCart } from "@/hook/useCart";
@@ -9,34 +9,46 @@ import TextArea from "@/components/text-area";
 import Checkbox from "@/components/checkbox";
 import { Radio } from "zmp-ui";
 import Button from "@/components/button";
-import { formatPrice, safeJsonParse } from "@/utils/format";
+import { formatPrice,  parseBrand, safeJsonParse } from "@/utils/format";
 import CheckoutLocation from "@/components/modals/checkout-location";
 import { AddressType, CreateOrderBody, PaymentType } from "@/types/order";
 import { useCreateOrder } from "@/hook/useCreateOrder";
 import OtpOrderModal from "@/components/modals/otp-order-modal";
 import { useNavigate } from "react-router-dom";
-import { checkingVoucherState } from "@/request/product";
+import { checkingVoucherState, verifyingVoucherState } from "@/request/product";
 import { useAtom } from "jotai";
 import toast from "react-hot-toast";
+import { checkoutInfoState } from "@/request/user";
  
 export default function CheckoutPage() {
-  const { items, totalPrice, summary, clearBuyNow, clearCart } = useCart();
-  console.log("🚀 ~ CheckoutPage ~ items:", items)
+  const { items, summary, clearBuyNow, clearCart } = useCart();
   const [paymentType, setPaymentType] = useState<PaymentType>("recieve");
   const navigate = useNavigate();
   const [voucher, setVoucher] = useState('')
-  const [voucherList, setVoucherList] = useState<VoucherItem[]>([])
-
+  const [voucherList, setVoucherList] = useState<Voucher[]>([])
+  const [checkoutInfo, setCheckoutInfo] = useAtom(checkoutInfoState);
   const [enableReciver, setEnableReciver] = useState(false)
   const [enableExport, setEnableExport] = useState(false)
   const [estimateTime, setEstimateTime] = useState<String>()
 
   const [showOtpModal, setShowOtpModal] = useState(false);
+  const [showOtpVoucherModal, setShowOtpVoucherModal] = useState(false);
+
   const [recive, setRecive] = useState<ReciveType>()
   const { createOrder, prepareCreateOrder, loading } = useCreateOrder();
   const [, checkVoucher] = useAtom(checkingVoucherState);
+  const [, verifyVoucher] = useAtom(verifyingVoucherState);
 
   useEffect(() => {
+    setBuyerForm((prev) => ({
+      ...prev,
+      ...checkoutInfo.buyer,
+    }));
+
+    setReceiverForm((prev) => ({
+      ...prev,
+      ...checkoutInfo.receiver,
+    }));
     return () => {
       clearBuyNow()
     }
@@ -48,6 +60,7 @@ export default function CheckoutPage() {
     email: "",
     notes: ""
   })
+  
   const [receiverForm, setReceiverForm] = useState({
     name: "",
     phone: "",
@@ -59,27 +72,36 @@ export default function CheckoutPage() {
     address: "",
   })
 
-  const getDeliveryFee = () => {
-    return 10000
-  }
   const handleApplyVoucher = async () => {
     try {
+      if (!buyerForm.phone) {
+        toast.error('Vui lòng điền số điện thoại')
+        return
+      }
+      if (!items?.length) {
+        toast.error('Vui lòng thêm sản phẩm vào giỏ hàng trước khi thanh toán')
+        return
+      }
       const result = await checkVoucher({
         phone: buyerForm.phone,
         voucherCode: voucher,
       });
-      if ((result as any).error) {
-        toast.error((result as any).message);
+      if (result.success) {
+        setShowOtpVoucherModal(true);
       } else {
-        if (result.data) {
-          setVoucherList([...voucherList, result.data])
-        }
-        toast.success('Thêm voucher thành công')
+        toast.error((result as any).message);
       }
     } catch (error) {
       toast.error((error as any));
     }
   };
+  const finalPayment = useMemo(() => {
+    const totalVoucherDiscount = voucherList.reduce(
+      (sum, voucher) => sum + (voucher.voucherValue || 0),
+      0
+    );
+    return Math.max(0, summary.payment - totalVoucherDiscount);
+  }, [summary.payment, voucherList]);
   const handleCheckout = async (otp: string) => {
     if (!recive?.selectedProvince) {
       return;
@@ -87,7 +109,11 @@ export default function CheckoutPage() {
     if (!recive?.selectedWard) {
       return;
     }
-    const ship = getDeliveryFee() 
+    if (!items?.length) {
+      toast.error('Vui lòng thêm sản phẩm vào giỏ hàng trước khi thanh toán')
+      return
+    }
+    const ship = summary.shippingFee
     const body = {
       customer_fullname: buyerForm.name,
       customer_phone: buyerForm.phone,
@@ -169,22 +195,46 @@ export default function CheckoutPage() {
       ].join(', '),
       estimated_delivery: estimateTime,
       isTaxIssued: false,
-      vouchers: [],
+      vouchers: voucherList?.map(x => ({
+        ...x,
+        VoucherType: x?.voucherType === 'Percent' ? 'Percentage' : 'Amount',
+        VoucherCode: x?.voucherCode,
+        VoucherValue: x?.voucherValue,
+        MaxValue: x?.maxValue,
+        IsEcoGreenVoucher: true,
+      })),
       shipping_type: recive.type === 'customer' ? 'viettle_post' : 'eco',
       totalAmountDiscount: summary.totalDiscount,
-      finalAmount: summary.payment + ship,
+      finalAmount: finalPayment,
       otp: otp,
       otp_phone: buyerForm.phone,
     } as any as CreateOrderBody;
     const result = await createOrder({
       form: body,
       callback: (code) => {
+        setCheckoutInfo({
+          buyer: {
+            name: buyerForm.name,
+            phone: buyerForm.phone,
+            email: buyerForm.email,
+          },
+          receiver: {
+            name: enableReciver ? receiverForm.name : "",
+            phone: enableReciver ? receiverForm.phone : "",
+            email: enableReciver ? receiverForm.email : "",
+          },
+          address: {
+            address: recive?.address ?? "",
+            province: recive?.selectedProvince ?? null,
+            ward: recive?.selectedWard ?? null,
+          },
+        });
+
         navigate(`/orders/${code}`)
         toast.success(`Đặt hàng thành công!, Mã đơn hàng: ${code}`, {
           icon: "🎉",
         });
         clearCart();
-        // navigate("/orders/" + order.code)
       }
     });
     if (!result.success) {
@@ -206,13 +256,40 @@ export default function CheckoutPage() {
       toast.error('Vui lòng chọn phương thức thanh toán')
       return
     }
+    if (!items?.length) {
+      toast.error('Vui lòng thêm sản phẩm vào giỏ hàng trước khi thanh toán')
+      return
+    }
     await prepareCreateOrder()
     setShowOtpModal(true);
   }
   const handleOtpConfirm = async (otp: string) => {
     handleCheckout(otp)
   }
-  const fee = getDeliveryFee()
+  const handleOtpVoucherConfirm = async (otp: string) => {
+    try {
+      const res = await verifyVoucher({
+        phone: buyerForm.phone,
+        voucherCode: voucher,
+        otpCode: otp
+      })
+      if (res?.id) {
+        const br = parseBrand(res?.brand)
+        const validItem = items.filter(x => br.includes(x.product.product_code))
+        if (validItem?.length > 0) {
+          setVoucherList([...voucherList, res])
+          toast.success('Thêm voucher thành công')
+        } else {
+          toast.error('Mã giảm giá không hợp lệ. Vui lòng nhập lại hoặc liên hệ 1800 556 889 (miễn cước) để được hỗ trợ.')
+        }
+        setVoucher('')
+      }
+    } catch (error) {
+      toast.error('Something went wrong, please try again!')
+    }
+    setShowOtpVoucherModal(false);
+  }
+  const fee = summary?.shippingFee ?? 0;
   return (
     <div className="pt-2">
       <HorizontalDivider />
@@ -233,7 +310,7 @@ export default function CheckoutPage() {
       >
         <div className="w-full gap-4 flex flex-col my-4">
           <TextInput isRequired title="Họ và tên người mua" value={buyerForm.name} onChange={(value) => setBuyerForm({...buyerForm, name: value})} placeHolder="Nhập họ và tên người mua"/>
-          <TextInput isRequired title="Số điện thoại" value={buyerForm.phone} onChange={(value) => setBuyerForm({...buyerForm, phone: value})} placeHolder="Nhập số điện thoại"/>
+          <TextInput inputMode="numeric" isRequired title="Số điện thoại" value={buyerForm.phone} onChange={(value) => setBuyerForm({...buyerForm, phone: value})} placeHolder="Nhập số điện thoại"/>
           <TextInput title="Email" value={buyerForm.email} onChange={(value) => setBuyerForm({...buyerForm, email: value})} placeHolder="Nhập email"/>
           <div className="flex items-center">
             <Checkbox
@@ -244,7 +321,7 @@ export default function CheckoutPage() {
           </div>
           {enableReciver && <>
             <TextInput isRequired title="Họ và tên người nhận" value={receiverForm.name} onChange={(value) => setReceiverForm({...receiverForm, name: value})} placeHolder="Nhập họ và tên người nhận"/>
-            <TextInput isRequired title="Số điện thoại người nhận" value={receiverForm.phone} onChange={(value) => setReceiverForm({...receiverForm, phone: value})} placeHolder="Nhập số điện thoại người nhận"/>
+            <TextInput inputMode="numeric" isRequired title="Số điện thoại người nhận" value={receiverForm.phone} onChange={(value) => setReceiverForm({...receiverForm, phone: value})} placeHolder="Nhập số điện thoại người nhận"/>
             <TextInput title="Email người nhận" value={receiverForm.email} onChange={(value) => setReceiverForm({...receiverForm, email: value})} placeHolder="Nhập email người nhận"/>
           </>}
           <TextArea title="Ghi chú" value={buyerForm.notes} onChange={(value) => setBuyerForm({...buyerForm, notes: value})} placeHolder="Nhập ghi chú cho đơn hàng"/>
@@ -331,7 +408,7 @@ export default function CheckoutPage() {
                   Giá trị đơn hàng
                 </div>
                 <div>
-                  {formatPrice(summary.subtotal)}
+                  {formatPrice(summary.discountPriceSum)}
                 </div>
               </div>
               <div className="flex items-center justify-between w-full my-1 mt-4 border-b border-dashed pb-1">
@@ -342,14 +419,25 @@ export default function CheckoutPage() {
                   {formatPrice(fee)}
                 </div>
               </div>
-              <div className="flex items-center justify-between w-full my-1 mt-4 border-b border-dashed pb-1">
+              {Boolean(summary.discounted) && <div className="flex items-center justify-between w-full my-1 mt-4 border-b border-dashed pb-1">
+                <div>
+                  Giảm giá
+                </div>
+                <div className=" text-danger">
+                  {formatPrice(summary.totalDiscount - summary.discounted)}
+                </div>
+              </div>}
+            
+              
+              
+              {/* <div className="flex items-center justify-between w-full my-1 mt-4 border-b border-dashed pb-1">
                 <div>
                   Sử dụng voucher
                 </div>
                 <div className="text-[#586189] cursor-pointer">
                   Chọn mã +
                 </div>
-              </div>
+              </div> */}
               <div className="flex flex-col w-full my-1 mt-4">
                 <div className="mb-2">
                   Nhập mã mua hàng (mã giảm giá)
@@ -366,13 +454,56 @@ export default function CheckoutPage() {
                   </Button>
                 </div>
               </div>
+              <div className="flex flex-col w-full my-1 mt-4">
+                {voucherList?.map((x) => (
+                  <div
+                    key={x.id}
+                    className="relative my-2 rounded-xl border border-gray-300 bg-white "
+                  >
+                    {/* top cut */}
+                    <div className="absolute left-[36%] top-0 h-6 w-6 -translate-x-1/2 -translate-y-4 rounded-full bg-white border-b border-gray-300" />
+                    {/* bottom cut */}
+                    <div className="absolute left-[36%] bottom-0 h-6 w-6 -translate-x-1/2 translate-y-4 rounded-full bg-white border-t border-gray-300" />
+                    <div className="flex items-center">
+                      {/* Left content */}
+                      <div className="flex flex-col flex-1 px-4 py-3">
+                        <div className="flex items-center gap-2">
+                          <span className="text-md font-medium">
+                            {x.voucherCode}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-[10px] text-[#32323280] font-medium">
+                            {x.fullName}
+                          </span>
+                        </div>
+                      </div>
+                    
+                      {/* Right content */}
+                      <div className="flex flex-[2] min-w-[120px] items-center justify-center px-4 py-3 border-l-2 border-dashed border-gray-300">
+                        <span className="text-[20px] font-[600] text-red-500">
+                          {formatPrice(x.voucherValue)}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
             </div>
+            {Boolean(summary?.voucher) && <div className="flex items-center justify-between w-full my-1 mt-4 border-b border-dashed pb-1">
+              <div>
+                Giảm giá voucher
+              </div>
+              <div>
+                {formatPrice(summary?.voucher ?? 0)}
+              </div>
+            </div>}
             <div className="flex items-center justify-between w-full py-4 mt-4 border-t   px-4 bg-[#D7DDF34D]">
               <div className="text-xl">
                 Thanh toán
               </div>
               <div className="font-[900] text-xl">
-                {formatPrice(summary.payment + fee)}
+                {formatPrice(finalPayment)}
               </div>
             </div>
           </div>
@@ -390,6 +521,13 @@ export default function CheckoutPage() {
         loading={loading}
         onClose={() => setShowOtpModal(false)}
         onConfirm={handleOtpConfirm}
+      />
+      <OtpOrderModal
+        open={showOtpVoucherModal}
+        phone={buyerForm.phone}
+        loading={false}
+        onClose={() => setShowOtpVoucherModal(false)}
+        onConfirm={handleOtpVoucherConfirm}
       />
     </div>
   );

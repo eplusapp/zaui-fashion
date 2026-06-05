@@ -10,6 +10,7 @@ import {
   WardParams,
   WardResponse,
 } from "@/types/locations";
+import moment from "moment";
 
 export const provincesState = atomFamily(
   (params: ProvinceParams = {}) =>
@@ -95,7 +96,7 @@ export const deliveryTimeState = atomFamily(
     atom(async () => {
       const { provinceId } = params;
       const res = await requestWithFallback<any>(
-        `/api/admin/estimated-delivery/public?provinceId=${provinceId}&orderType=1`,
+        `/api/admin/estimated-delivery/calculate?provinceCode=${provinceId}&orderDate=${moment().format("YYYY-MM-DDTHH:mm:ss")}`,
         {
           estimatedWareHouse: "",
           estimatedWareHousePeriod: "",

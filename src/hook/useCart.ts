@@ -1,15 +1,18 @@
-import { useAtom } from "jotai";
-import { useCallback, useMemo } from "react";
+import { useAtom, useAtomValue } from "jotai";
+import { useCallback, useEffect, useMemo } from "react";
 
 import { Product } from "@/types/products";
 import { CartItem, CartSummary } from "@/types/cart";
 import toast from "react-hot-toast";
 import { buyNowState, cartState } from "@/request/cart";
+import { promotionDataState, promotionState } from "@/request/order";
 
 export function useCart() {
   const [cart, setCart] = useAtom(cartState);
   const [buyNowItem, setBuyNowItem] = useAtom(buyNowState);
-
+  const promotion = useAtomValue(promotionDataState);
+  
+  
   const calculateCart = useCallback((items: CartItem[]) => {
     const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
     const totalPrice = items.reduce((sum, item) => {
@@ -171,116 +174,35 @@ export function useCart() {
     return checkoutItems.reduce((sum, item) => sum + item.quantity, 0);
   }, [checkoutItems]);
 
-  const calculateSummary = (
-    items: CartItem[],
-    shippingFee = 0,
-  ): CartSummary => {
-    const subtotal = items.reduce((sum, item) => {
-      return sum + Number(item.product.original_price || 0) * item.quantity;
-    }, 0);
-
-    const discounted = items.reduce((sum, item) => {
+  const summary = useMemo(() => {
+    const totalDiscount =
+      (promotion?.totalDiscountPromotion ?? 0) +
+      (promotion?.totalDiscountVoucher ?? 0);
+    
+    const discounted = checkoutItems.reduce((sum, item) => {
       const original = Number(item.product.original_price || 0);
       const discount = Number(
         item.product.discount_price ?? item.product.original_price ?? 0,
       );
-
       return sum + (original - discount) * item.quantity;
     }, 0);
-
-    const payment = items.reduce((sum, item) => {
-      const price = Number(
+    const discountPriceSum = checkoutItems.reduce((sum, item) => {
+      const discount = Number(
         item.product.discount_price ?? item.product.original_price ?? 0,
       );
-
-      return sum + price * item.quantity;
+      return sum +  discount * item.quantity;
     }, 0);
-
-    const totalQuantity = items.reduce((sum, item) => sum + item.quantity, 0);
-
     return {
-      subtotal,
-      discounted,
-      totalDiscount: discounted,
-      shippingFee,
-      payment: payment + shippingFee,
-      totalQuantity,
+      subtotal: promotion?.totalOriginalPrice ?? 0,
+      discountPriceSum,
+      discounted: discounted,
+      voucher: promotion?.totalDiscountVoucher,
+      totalDiscount: totalDiscount,
+      shippingFee: promotion?.shippingFee ?? 0,
+      payment: promotion?.collectibleAmount ?? 0,
+      totalQuantity: 1,
     };
-  };
-
-  const getPromotionPrice = (items: CartItem[], hasVoucher: boolean) => {
-    if (hasVoucher) return 0;
-
-    const promotionItems = items.filter((item) => {
-      return (
-        listPromotionProduct.some((code) =>
-          item.product.product_code?.toLowerCase().includes(code.toLowerCase()),
-        ) && item.product.product_type !== "combo"
-      );
-    });
-
-    if (!promotionItems.length) return 0;
-
-    const now = new Date();
-
-    let eligibleItems = promotionItems;
-
-    const activeFlashSale = FLASH_SALE_SLOTS.find(
-      (slot) => now >= slot.startAt && now < slot.endAt,
-    );
-
-    if (activeFlashSale) {
-      eligibleItems = promotionItems.filter(
-        (item) =>
-          !activeFlashSale.products.some((code) =>
-            item.product.product_code
-              ?.toLowerCase()
-              .includes(code.toLowerCase()),
-          ),
-      );
-    }
-
-    if (!eligibleItems.length) return 0;
-
-    for (const program of PROGRAMS) {
-      const isAfterStart = !program.startAt || now >= program.startAt;
-
-      const isBeforeEnd = !program.endAt || now < program.endAt;
-
-      if (!isAfterStart || !isBeforeEnd) {
-        continue;
-      }
-
-      if (program.name === "crossSale") {
-        return program.getDiscount(eligibleItems, items);
-      }
-
-      const totalPromotionPrice = eligibleItems.reduce(
-        (sum, item) =>
-          sum +
-          Number(item.product.discount_price ?? item.product.original_price) *
-            item.quantity,
-        0,
-      );
-
-      return program.getDiscount([]);
-    }
-
-    return 0;
-  };
-
-
-  const summary = useMemo(() => {
-    const promotion = 0; 
-    // getPromotionPrice(checkoutItems, false);
-    const summary = calculateSummary(checkoutItems);
-    return {
-      ...calculateSummary(checkoutItems),
-      crossSale: promotion,
-      totalDiscount: summary?.totalDiscount + promotion,
-      payment: summary.payment - promotion,
-    };
-  }, [checkoutItems]);
+  }, [checkoutItems, promotion]);
 
   const getDiscount = (product: Product) => {
     const before = Number(product.original_price);
@@ -295,7 +217,6 @@ export function useCart() {
     items: checkoutItems,
     totalPrice: checkoutTotalPrice,
     totalQuantity: checkoutTotalQuantity,
-    calculateSummary,
     summary,
     clearBuyNow,
     buyNow,

@@ -34,7 +34,7 @@ export default function OrderItem(props: Props) {
         {renderLine('Số tiền', '#586189', `${formatPrice(order.costs.collectible_amount?.amount)}`, '#1E266E', true)}
         {renderLine('Ngày giao dự kiến', '#586189', `${order.estimated_delivery ? moment(order.estimated_delivery).format('DD/MM/YYYY') : '-'}`, '#233248', true)}
         {renderLine('Hình thức thanh toán', '#586189', `${order.code}`, '#233248')}
-        {renderLine('Trạng thái', '#586189', `${getOrderStatus(order, !order.is_eco)}`, `${getOrderColor(order, !order.is_eco)}`, true)}
+        {/* {renderLine('Trạng thái', '#586189', `${getOrderStatus(order, !order.is_eco)}`, `${getOrderColor(order, !order.is_eco)}`, true)} */}
         {renderLine('Họ tên người nhận', '#586189', `${order.customer_fullname}`, '#233248')}
         {renderLine('Số di động', '#586189', `${order.customer_phone}`, '#233248')}
         {renderLine('Địa chỉ nhận hàng', '#586189', `${[order.address?.receiver_address, order.address?.ward_name, order.address?.province_name].join(', ')}`, '#233248')}

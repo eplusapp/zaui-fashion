@@ -1,17 +1,7 @@
-import ProductItem from "@/components/product-item";
 import SearchBar from "@/components/search-bar";
-import Section from "@/components/section";
-import { ProductItemSkeleton } from "@/components/skeleton";
-import { EmptyBoxIcon, SearchIconLarge } from "@/components/vectors";
-import { useAtom, useAtomValue } from "jotai";
-import { Suspense, useEffect, useMemo, useRef, useState } from "react";
-import {
-  keywordState,
-  recommendedProductsState,
-} from "@/state";
+import { EmptyBoxIcon } from "@/components/vectors";
+import { useAtom } from "jotai";
 import { useNavigate } from "react-router-dom";
-import { bestSaleProductsState, productsState } from "@/request/product";
-import { Product } from "@/types/products";
 import { ordersState } from "@/request/order";
 import OrderItem from "./order-item";
 export default function OrderPage() {
@@ -27,7 +17,7 @@ export default function OrderPage() {
     }
   return (
     <div className="py-2">
-      <SearchBar />
+      {/* <SearchBar /> */}
       {orders.map(x => {
         return <OrderItem order={x} key={x.code}/>
       })}

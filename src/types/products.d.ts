@@ -179,25 +179,59 @@ export interface CheckVoucherBody {
   phone: string;
   voucherCode: string;
 }
-
-export interface CheckVoucherResponse {
-  success?: boolean;
-  message?: string;
-
-  data?: {
-    code: string;
-    value: number;
-    type: string;
-    discount: number;
-    finalDiscount: number;
-    expiredAt?: string;
-  };
+export interface VeryfiVoucherBody {
+  phone: string;
+  voucherCode: string;
+  otpCode: string;
 }
-export interface VoucherItem {
-  code: string;
-  value: number;
-  type: string;
-  discount: number;
-  finalDiscount: number;
-  expiredAt?: string;
+export interface Voucher {
+  id: string;
+  voucherCode: string;
+  fullName: string;
+  phone: string;
+  voucherValue: number;
+  voucherType: string;
+  voucherName: string;
+  description: string | null;
+  voucherDefinitionType: string;
+  availableQuantity: number;
+  usedQuantity: number;
+  status: string;
+  startDate: string | null;
+  expiredDate: string;
+  maxValue: number | null;
+  shippingFee: number | null;
+  source: string;
+  province: string;
+  applySource: string;
+  customerCode: string;
+  brand: string;
+  updatedUser: string | null;
+  importBy: string | null;
+  storeCode: string | null;
+  storeName: string | null;
+  drugStoreIp: string | null;
+  updatedLogs: unknown | null;
+  voucherStores: unknown[] | null;
+  schemeStores: unknown[] | null;
+  numberVoucher: number | null;
+  applyMultiOrder: boolean | null;
+  createdAt: string | null;
+  updatedAt: string;
+  promotion_id: string;
+  caseNumber: string | null;
+  ly_PromotionID: string | null;
+  ly_ProductCode: string | null;
+  ly_LoyaltyNumber: string | null;
+  ly_CreatedBy: string | null;
+  status_offset: string;
+  status_offset_at: string | null;
+  status_offset_by: string | null;
+  extraInfo: {
+    staffInfo: string;
+  };
+  orderCodeErp: string | null;
+  invoiceNumber: string | null;
+  invoiceDate: string | null;
+  voucherGroup: string;
 }

@@ -32,18 +32,18 @@ export default function CartSummary() {
             Giảm giá sản phẩm
           </div>
           <div className="text-lg font-[900] font-medium text-danger">
-            {formatPrice(summary.discounted)}
+            {formatPrice(summary.discounted || 0)}
+          </div>
+        </div>}
+        {Boolean(summary.voucher) && <div className="flex justify-between items-center">
+          <div className="text-lg font-medium text-primary">
+            Giảm giá voucher
+          </div>
+          <div className="text-lg font-[900] font-medium text-danger">
+            {formatPrice(summary.voucher || 0)}
           </div>
         </div>}
         
-        {Boolean(summary.crossSale) && <div className="flex justify-between items-center">
-          <div className="text-lg font-medium text-primary">
-            Giảm giá Cross sale
-          </div>
-          <div className="text-lg font-[900] font-medium text-danger">
-            {formatPrice(summary.crossSale)}
-          </div>
-        </div>}
         {Boolean(summary.totalDiscount) && <div className="flex justify-between items-center">
           <div className="text-lg font-medium text-primary">
             Tiết kiệm

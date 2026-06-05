@@ -38,7 +38,7 @@ export const useCreateOrder = () => {
         const queryString = new URLSearchParams(utm).toString();
         const order = await createOrderRequest({
           ...form,
-          source: "web",
+          source: "ZaloShop",
           payment_status: "open",
           url_order: queryString,
         });
@@ -112,29 +112,28 @@ async function handlePayment({
   switch (paymentType) {
     case "domestic_card":
     case "international_card":
-      const response = await requestWithFallback<{
-        paymentUrl?: string;
-        data?: {
-          paymentUrl?: string;
-        };
-      }>(
-        "/payment/redirect", // TODO: vnpay endpoint
-        {},
-        {
-          method: "POST",
-          body: JSON.stringify({
-            card: "vnpay",
-            reference_number: referenceNumber,
-            amount,
-            return_url: returnUrl,
-          }),
-        },
-      );
-      const paymentUrl = response?.paymentUrl ?? response?.data?.paymentUrl;
-      if (paymentUrl) {
-        await openWebview({
-          url: paymentUrl,
-        });
+      try {
+        const response = await requestWithFallback<any>(
+          `/payment/redirect?card=vnpay&reference_number=${encodeURIComponent(
+            referenceNumber,
+          )}&amount=${amount}&return_url=${encodeURIComponent(returnUrl)}`,
+          {},
+          {
+            method: "GET",
+          },
+        );
+        const paymentUrl =
+          response?.paymentUrl ??
+          response?.data?.paymentUrl ??
+          response?.data ??
+          response?.url;
+        if (paymentUrl) {
+          await openWebview({
+            url: paymentUrl,
+          });
+        }
+      } catch (error) {
+        console.error("Payment error:", error);
       }
       return;
     case "qrCode":
