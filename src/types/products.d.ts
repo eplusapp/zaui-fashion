@@ -173,6 +173,7 @@ export type ReciveType = {
   selectedProvince?: { id: string; name: string };
   selectedWard?: { id: string; name: string };
   address?: string;
+  region?: "north" | "south" | "central";
 };
 
 export interface CheckVoucherBody {

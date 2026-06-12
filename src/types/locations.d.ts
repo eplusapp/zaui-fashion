@@ -9,6 +9,7 @@ export interface Ward {
   code: string;
   name: string;
   sort?: number;
+  ecoRegion?: "north" | "south" | "central";
 }
 
 export interface ProvinceResponse {

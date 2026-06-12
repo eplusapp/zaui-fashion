@@ -66,6 +66,7 @@ export default function CheckoutPage() {
     phone: "",
     email: "",
   })
+  console.log('recive', recive)
   const [exportForm, setExportForm] = useState({
     companyName: "",
     taxCode: "",
@@ -130,7 +131,7 @@ export default function CheckoutPage() {
       ward_name: recive.selectedWard.name,
       erp_province_id: recive.selectedProvince.id,
       erp_ward_id: recive.selectedWard.id,
-      warehouse: '',
+      warehouse: recive.region,
       payment_type: paymentType,
       invoicing: enableExport,
       invoice_company: exportForm.companyName,

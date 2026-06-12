@@ -20,7 +20,8 @@ const ecoAddress = [{
     ward_id: '00229',
     ward_name: 'Phường Kim Liên',
     erp_province_id: '01',
-    erp_ward_id: '00229'
+    erp_ward_id: '00229',
+    ecoRegion: "north"
 }, {
     address: 'Lô 02, 03-A4.3 khu Công viên Bắc Tượng đài',
     province_id: '48',
@@ -28,7 +29,8 @@ const ecoAddress = [{
     ward_id: '20257',
     ward_name: 'Phường Hòa Cường',
     erp_province_id: '48',
-    erp_ward_id: '20257'
+    erp_ward_id: '20257',
+    ecoRegion: "central"
 }, {
     address: '148 Hoàng Hoa Thám',
     province_id: '79',
@@ -36,7 +38,8 @@ const ecoAddress = [{
     ward_id: '26983',
     ward_name: 'Phường Bảy Hiền',
     erp_province_id: '79',
-    erp_ward_id: '26983'
+    erp_ward_id: '26983',
+    ecoRegion: "south"
 }]
 export default function CheckoutLocation(props: Props) {
     const { recive, setRecive, setEstimateTime } = props;
@@ -67,7 +70,7 @@ export default function CheckoutLocation(props: Props) {
     }));
 
     const getTimeDelivery = () => {
-        setEstimateTime(timeReciver?.latesDeliveryDate)
+        setEstimateTime(timeReciver?.latestDeliveryDate)
         return [timeReciver?.earliestDeliveryDate, timeReciver.latestDeliveryDate]?.filter(x => Boolean(x))?.map(x => moment(x).format('DD/MM/YYYY'))?.join(' - ')
     };
 
@@ -135,6 +138,7 @@ export default function CheckoutLocation(props: Props) {
                         setRecive({
                             ...recive,
                             type: recive?.type || "customer",
+                            region: ward.ecoRegion,
                             selectedWard: {
                                 id: ward.code,
                                 name: ward.name,
@@ -194,6 +198,7 @@ export default function CheckoutLocation(props: Props) {
                             id: item.ward_id,
                             name: item.ward_name
                         },
+                        region: item.ecoRegion as any,
                         address: item.address
                     })
                     setOpen(false)
