@@ -14,6 +14,7 @@ import {
 } from "@/types/products";
 import deepEqual from "fast-deep-equal";
 import { CreateOrderBody, CreateOrderResponse } from "@/types/order";
+import { decrypt } from "@/utils/format";
 
 export const userState = atom(() =>
   getUserInfo({
@@ -132,14 +133,52 @@ export const createOrderState = atom(
   },
 );
 
-export const getOrderOtpState = atom(null, async () => {
-  return requestWithFallback<Boolean>(
+
+export const createOrderOtpState = atom(null, async (_, __, phone: string) => {
+  const isOtpRequired = await requestWithFallback<boolean>(
     "/api/settings?key=ORDER_OTP",
-    false as Boolean,
+    false,
     {
       method: "GET",
     },
   );
+
+  if (!isOtpRequired) {
+    return {
+      isOtpRequired: false,
+      otpSent: false,
+    };
+  }
+
+  const csrfResponse = await requestWithFallback<any>(
+    "/api/auth/csrf-token",
+    null,
+    {
+      method: "GET",
+    },
+  );
+
+  const csrf = decrypt(csrfResponse);
+  const otpResponse = await requestWithFallback<any>(
+    "/api/order/send-otp",
+    null,
+    {
+      method: "POST",
+      body: JSON.stringify({
+        phone,
+      }),
+      headers: {
+        "csrf-token": csrf.token,
+        "csrf-secret": csrf.secret,
+      },
+    },
+  );
+
+  return {
+    isOtpRequired: true,
+    otpSent: !!otpResponse,
+    data: otpResponse,
+  };
 });
 export interface GetOrderParams {
   code: string;

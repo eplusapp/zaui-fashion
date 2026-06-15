@@ -1,4 +1,4 @@
-import CryptoJS from "crypto-js";
+import * as CryptoJS from "crypto-js";
 import { getConfig } from "./template";
 
 export function formatPrice(price: number) {
@@ -42,21 +42,24 @@ export const parseBrand = (brand = "") => {
 };
 const KEY_IV = getConfig((config) => config.template.KEY_IV);
 
-export const decrypt = (text) => {
-  const key = CryptoJS.enc.Utf8.parse(KEY_IV);
-  const iv = CryptoJS.enc.Hex.parse(text.iv);
+export const decrypt = (text: any) => {
+  try {
+    const key = CryptoJS.enc.Utf8.parse(KEY_IV);
+    const iv = CryptoJS.enc.Hex.parse(text.iv);
 
-  const decrypted = CryptoJS.AES.decrypt(
-    {
+    const cipherParams = CryptoJS.lib.CipherParams.create({
       ciphertext: CryptoJS.enc.Hex.parse(text.encryptedData),
-    },
-    key,
-    {
+    });
+    const decrypted = CryptoJS.AES.decrypt(cipherParams, key, {
       iv,
       mode: CryptoJS.mode.CBC,
       padding: CryptoJS.pad.Pkcs7,
-    },
-  );
+    });
 
-  return JSON.parse(CryptoJS.enc.Utf8.stringify(decrypted));
+    const decryptedText = CryptoJS.enc.Utf8.stringify(decrypted);
+
+    return JSON.parse(decryptedText);
+  } catch (error) {
+    throw error;
+  }
 };

@@ -66,7 +66,6 @@ export default function CheckoutPage() {
     phone: "",
     email: "",
   })
-  console.log('recive', recive)
   const [exportForm, setExportForm] = useState({
     companyName: "",
     taxCode: "",
@@ -261,8 +260,11 @@ export default function CheckoutPage() {
       toast.error('Vui lòng thêm sản phẩm vào giỏ hàng trước khi thanh toán')
       return
     }
-    await prepareCreateOrder()
-    setShowOtpModal(true);
+    await prepareCreateOrder(
+      () => handleCheckout(''),
+      () => setShowOtpModal(true),
+      buyerForm.phone
+    )
   }
   const handleOtpConfirm = async (otp: string) => {
     handleCheckout(otp)

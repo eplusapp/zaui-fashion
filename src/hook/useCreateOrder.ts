@@ -8,7 +8,7 @@ import {
   CreateOrderResponse,
   PaymentType,
 } from "@/types/order";
-import { createOrderState, getOrderOtpState } from "@/request/product";
+import { createOrderState, createOrderOtpState } from "@/request/product";
 import { requestWithFallback } from "@/utils/request";
 import { getConfig } from "@/utils/template";
 import { addOrderState } from "@/request/order";
@@ -25,7 +25,7 @@ export const useCreateOrder = () => {
   const addOrder = useSetAtom(addOrderState);
 
   const createOrderRequest = useSetAtom(createOrderState);
-  const crateOrderOtpRequest = useSetAtom(getOrderOtpState);
+  const crateOrderOtpRequest = useSetAtom(createOrderOtpState);
 
   const createOrder = useCallback(
     async ({
@@ -76,10 +76,14 @@ export const useCreateOrder = () => {
     [createOrderRequest],
   );
   const prepareCreateOrder =
-    useCallback(async (): Promise<void> => {
+    useCallback(async (createOrderCallBack: () => void, openOtpCallBack: () => void, phone: string): Promise<void> => {
       try {
-        const otpConfig = await crateOrderOtpRequest();
-        console.log("🚀 ~ useCreateOrder ~ otpConfig:", otpConfig)
+        const otpConfig = await crateOrderOtpRequest(phone);
+        if (otpConfig.isOtpRequired) {
+          openOtpCallBack();
+        } else {
+          createOrderCallBack();
+        }
       } catch (error) {
         console.error(error);
       }
@@ -100,9 +104,7 @@ async function handlePayment({
   paymentType: PaymentType;
   amount: number;
 }) {
-  console.log("🚀 ~ handlePayment ~ amount:", amount)
-  console.log("🚀 ~ handlePayment ~ paymentType:", paymentType)
-  console.log("🚀 ~ handlePayment ~ order:", order)
+
   const referenceNumber = `${order.code}_${Date.now()}`;
   const API_URL = getConfig((config) => config.template.apiUrl);
   
