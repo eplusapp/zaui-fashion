@@ -1,8 +1,6 @@
 import { useAtom, useAtomValue } from "jotai";
 import { useNavigate, useParams } from "react-router-dom";
-import { getOrderState } from "@/request/product";
-import { Product } from "@/types/products";
-import { orderDetailDataState, orderDetailState, ordersState } from "@/request/order";
+import { orderDetailState, ordersState } from "@/request/order";
 import { getOrderColor, getOrderStatus } from "@/utils/cart";
 import { formatPrice } from "@/utils/format";
 import moment from "moment";
@@ -16,16 +14,13 @@ import { PageSkeleton } from "@/components/skeleton";
 
 export default function OrderDetailPage() {
   const { id } = useParams();
-  const [orders] = useAtom(ordersState);
-  const orderLocal = orders.find(x => x.code === id)
-  const phone = orderLocal?.customer_phone!;
 
   const params = useMemo(
     () => ({
-      phone,
+      phone: '0335913021',
       code: id ?? "",
     }),
-    [phone, id]
+    [id]
   );
 
   const order = useAtomValue(

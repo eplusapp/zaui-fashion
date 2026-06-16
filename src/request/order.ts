@@ -153,24 +153,14 @@ export const orderDetailState = atomFamily(
       if (!phone || !code) {
         return null;
       }
-      const _getCfrs = await requestWithFallback<any>(
-        `/api/auth/csrf-token`,
-        null,
-        {
-          method: "GET",
-        },
-      );
-      const _deScript = decrypt(_getCfrs);
+      const headers = await getCsrfHeaders();
 
       const res = await requestWithFallback<any>(
         `/api/order/by-phone?phone=${phone}&page=1&limit=10&code=${code}`,
         null,
         {
           method: "GET",
-          headers: {
-            "csrf-token": _deScript.token,
-            "csrf-secret": _deScript.secret,
-          },
+          headers,
         },
       );
 
@@ -183,4 +173,65 @@ export const orderDetailDataState = atomFamily(
   (params: OrderDetailParams) =>
     unwrap(orderDetailState(params), (prev) => prev ?? null),
   deepEqual,
+);
+
+interface OrderListParams {
+  phone: string;
+  page?: number;
+  limit?: number;
+  code?: string;
+}
+
+const getCsrfHeaders = async () => {
+  const csrfResponse = await requestWithFallback<any>(
+    "/api/auth/csrf-token",
+    null,
+    {
+      method: "GET",
+    },
+  );
+
+  const csrf = decrypt(csrfResponse);
+
+  return {
+    "csrf-token": csrf.token,
+    "csrf-secret": csrf.secret,
+  };
+};
+
+interface GetOrdersParams {
+  phone: string;
+  page?: number;
+  limit?: number;
+  code?: string;
+}
+
+export const getOrdersState = atom(
+  null,
+  async (_, __, params: GetOrdersParams) => {
+    const { phone, page = 1, limit = 10, code } = params;
+
+    if (!phone) {
+      return [];
+    }
+    const headers = await getCsrfHeaders();
+ 
+    const query = new URLSearchParams({
+      phone,
+      page: String(page),
+      limit: String(limit),
+      ...(code ? { code } : {}),
+    });
+
+    const res = await requestWithFallback<any>(
+      `/api/order/by-phone?${query.toString()}`,
+      null,
+      {
+        method: "GET",
+        headers,
+      },
+    );
+
+    return res?.data ?? res?.orders ?? [];
+  },
 );
