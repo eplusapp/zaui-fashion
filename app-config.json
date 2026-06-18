@@ -14,8 +14,9 @@
   "listAsyncJS": [],
   "template": {
     "name": "zaui-fashion",
+    "env": "STAG",
     "apiUrl": "https://ecogreen.com.vn",
-    "apiUrlDev": "https://dev.ecogreen.com.vn",
+    "apiUrlDev": "https://stag.ecogreen.com.vn",
     "ecoUrl": "https://eco-app-api.e-plus.vn",
     "x-apikey": "686ff9e204d34qsk581f548c0c0268fh",
     "KEY_IV": "3ef93ec88da94c69b23da8e8a66eeb40",

@@ -132,7 +132,21 @@ export const createOrderState = atom(
     );
   },
 );
-
+export const createMACState = atom(
+  null,
+  async (_, __, body: any) => {
+    return requestWithFallback<any>("/api/webhook/zalo/create-mac", {} as any, {
+      method: "POST",
+      body: JSON.stringify(body),
+    });
+  },
+);
+export const getPhoneNumberState = atom(null, async (_, __, body: any) => {
+  return requestWithFallback<any>("/api/webhook/zalo/phone-number", {} as any, {
+    method: "POST",
+    body: JSON.stringify(body),
+  });
+});
 
 export const createOrderOtpState = atom(null, async (_, __, phone: string) => {
   const isOtpRequired = await requestWithFallback<boolean>(

@@ -149,6 +149,7 @@ export default function CheckoutPage() {
       products: items.map((item) => ({ 
         id: String(item.product.id), 
         quantity: item.quantity,
+        unit_price: item.product.discount_price || item.product.original_price,
         comboProducts: safeJsonParse(
           item.product.comboProducts,
           [],
@@ -230,7 +231,7 @@ export default function CheckoutPage() {
           },
         });
 
-        navigate(`/orders/${code}`)
+        // navigate(`/orders/${code}`)
         toast.success(`Đặt hàng thành công!, Mã đơn hàng: ${code}`, {
           icon: "🎉",
         });

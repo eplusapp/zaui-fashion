@@ -1,8 +1,6 @@
 import { useAtom, useAtomValue } from "jotai";
-import { useNavigate, useParams } from "react-router-dom";
-import { getOrderState } from "@/request/product";
-import { Product } from "@/types/products";
-import { orderDetailDataState, orderDetailState, ordersState } from "@/request/order";
+import { useNavigate, useParams, useSearchParams } from "react-router-dom";
+import { orderDetailState, ordersState } from "@/request/order";
 import { getOrderColor, getOrderStatus } from "@/utils/cart";
 import { formatPrice } from "@/utils/format";
 import moment from "moment";
@@ -13,9 +11,13 @@ import {  } from "zmp-sdk/apis";
 import { Icon } from "zmp-ui";
 import { Suspense, useMemo } from "react";
 import { PageSkeleton } from "@/components/skeleton";
+import { useCreateOrder } from "@/hook/useCreateOrder";
 
 export default function OrderDetailPage() {
   const { id } = useParams();
+  const { createZaloPaymentOrder } = useCreateOrder()
+  const [searchParams] = useSearchParams();
+  const status = searchParams.get("status");
   const [orders] = useAtom(ordersState);
   const orderLocal = orders.find(x => x.code === id)
   const phone = orderLocal?.customer_phone!;
@@ -31,6 +33,33 @@ export default function OrderDetailPage() {
   const order = useAtomValue(
     orderDetailState(params)
   );
+  console.log('order ---->', order)
+  const startPayment = async () => {
+    await createZaloPaymentOrder({
+      paymentType: order.payment_type,
+      orderCode: order.code,
+      orderId: order.id,
+      phone: order.customer_phone,
+      amount: order.total_discount_price || order.total_original_price,
+      items:
+        order.products?.map((x) => ({
+          id: x.id,
+          amount: x.unit_price || x.original_price,
+          quantity: x.quantity,
+        })) || [],
+      onSuccess: (data) => {
+        toast.success("Thanh toán thành công. Cảm ơn bạn đã mua hàng!", {
+          icon: "🎉",
+        });
+        navigate(`/orders/${order.code}?status=success`, {
+          replace: true,
+        });
+      },
+      onFail: (error) => {
+        console.error(error);
+      },
+    });
+  }
   const navigate = useNavigate()
   const continuteShop = () => {
     navigate("/")
@@ -93,6 +122,10 @@ export default function OrderDetailPage() {
           <div className="text-white font-[800] text-lg">Đang chờ thanh toán</div>
           <div className="text-white font-[600] text-lg text-center">Quý khách vui lòng thanh toán đơn hàng trong vòng 24h.</div>
         </div>}
+        {status && status === 'pending' && order.payment_type === 'receiver' && !checkGift() && <div className="w-full items-center flex flex-col py-3 px-4" style={{ backgroundColor: '#F7941D' }}>
+          <div className="text-white font-[800] text-lg">Đang chờ xác nhận</div>
+          <div className="text-white font-[600] text-lg text-center">Quý khách vui lòng thanh toán đơn hàng khi nhận hàng.</div>
+        </div>}
         {order.payment_status === 'success' && !checkGift() && <div className="w-full items-center flex flex-col py-3 px-4" style={{ backgroundColor: '#00B712' }}>
           <div className="text-white font-[800] text-lg">Thanh toán thành công</div>
           <div className="text-white font-[600] text-lg text-center">Cảm ơn Quý khách đã đặt hàng tại Ecogreen. Đơn hàng của Quý khách sẽ được giao đến địa chỉ đăng ký.</div>
@@ -124,6 +157,7 @@ export default function OrderDetailPage() {
           {renderLine('Điểm còn lại', '#586189', `${order?.remain_point}`, '#233248')}
         </div>
         {order?.payment_type === 'transfer' &&
+          <>
           <div className="flex flex-col gap-1 mt-4 bg-[#fff] p-2 border border-1  rounded">
             <div className="font-[600] text-lg flex items-center gap-2 mb-2">
               <div>
@@ -153,8 +187,12 @@ export default function OrderDetailPage() {
               Mọi thắc mắc và góp ý vui lòng liên hệ Hotline Chăm sóc khách hàng: 0287 307 6089
             </div>
           </div>
+          <Button primary className="w-full font-[900] text-xl mt-4" onClick={startPayment}>
+            Thanh toán bằng chuyển khoản
+          </Button>
+          </>
         }
-        <Button primary className="w-full font-[900] text-xl mt-4" onClick={continuteShop}>
+        <Button  className="w-full font-[900] text-xl mt-4" onClick={continuteShop}>
           Tiếp tục mua
         </Button>
       </div>
