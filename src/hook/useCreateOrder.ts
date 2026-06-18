@@ -196,7 +196,7 @@ export const useCreateOrder = () => {
         ecoOrderId: orderCode,
       }),
       method: JSON.stringify({
-        id: ENV === "stag" ? paymentMethodSandBox : paymentMethod,
+        id: ENV === "STAG" ? paymentMethodSandBox : paymentMethod,
         isCustom: false,
       }),
     };
