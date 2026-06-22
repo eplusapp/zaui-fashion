@@ -1,12 +1,14 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, useLocation } from "react-router-dom";
 import Header from "./header";
 import Footer from "./footer";
 import { Suspense } from "react";
 import { PageSkeleton } from "./skeleton";
 import { Toaster } from "react-hot-toast";
 import { ScrollRestoration } from "./scroll-restoration";
+const listRouteWithFooter = ["/", "/cart", "/orders"];
 
 export default function Layout() {
+  const location = useLocation();
   return (
     <div className="w-screen h-screen flex flex-col bg-background text-foreground">
       <Header />
@@ -15,7 +17,7 @@ export default function Layout() {
           <Outlet />
         </Suspense>
       </div>
-      <Footer />
+      {listRouteWithFooter.includes(location.pathname) && <Footer />}
       <Toaster
         containerClassName="toast-container"
         containerStyle={{

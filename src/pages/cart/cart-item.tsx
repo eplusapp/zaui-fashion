@@ -1,128 +1,51 @@
-import Checkbox from "@/components/checkbox";
 import QuantityInput from "@/components/quantity-input";
-import { useAddToCart } from "@/hooks";
-import { CartItem as CartItemProps } from "@/types";
+import { CartItem as CartItemProps } from "@/types/cart";
 import { formatPrice } from "@/utils/format";
-import { animated, useSpring } from "@react-spring/web";
-import { useDrag } from "@use-gesture/react";
 import { RemoveIcon } from "@/components/vectors";
-import { useAtom } from "jotai";
-import { selectedCartItemIdsState } from "@/state";
-import { useEffect, useMemo, useState } from "react";
-
-const SWIPE_TO_DELTE_OFFSET = 80;
+import { useMemo } from "react";
+import { useCart } from "@/hook/useCart";
 
 export default function CartItem(props: CartItemProps) {
-  const [quantity, setQuantity] = useState(props.quantity);
-  const { addToCart } = useAddToCart(props.product, props.id);
+  const { getDiscount, updateQuantity, removeFromCart } = useCart();
 
-  const [selectedItemIds, setSelectedItemIds] = useAtom(
-    selectedCartItemIdsState
-  );
-
-  const displayOptions = useMemo(
-    () =>
-      Object.entries({
-        Size: props.options.size,
-        Color: props.options.color,
-      })
-        .filter(([_, value]) => value !== undefined)
-        .map(([key, value]) => `${key}: ${value}`)
-        .join(" | "),
-    [props.options]
-  );
-
-  // update cart
-  useEffect(() => {
-    addToCart(quantity);
-  }, [quantity]);
-
-  // swipe left to delete animation
-  const [{ x }, api] = useSpring(() => ({ x: 0 }));
-  const bind = useDrag(
-    ({ last, offset: [ox] }) => {
-      if (last) {
-        if (ox < -SWIPE_TO_DELTE_OFFSET) {
-          api.start({ x: -SWIPE_TO_DELTE_OFFSET });
-        } else {
-          api.start({ x: 0 });
-        }
-      } else {
-        api.start({ x: Math.min(ox, 0), immediate: true });
-      }
-    },
-    {
-      from: () => [x.get(), 0],
-      axis: "x",
-      bounds: { left: -100, right: 0, top: 0, bottom: 0 },
-      rubberband: true,
-      preventScroll: true,
-    }
-  );
+  const thump = props.product?.images?.find(x => x.type === 'thumbnail')
+  const discount = useMemo(() => getDiscount(props.product), [props.product.discount_price, props.product.original_price])
 
   return (
     <div className="relative">
-      <div className="absolute right-0 top-0 bottom-0 w-20 border-t-[0.5px] border-b-[0.5px] border-black/10">
-        <div
-          className="bg-danger text-white/95 w-full h-full flex flex-col space-y-1 justify-center items-center cursor-pointer"
-          onClick={() => addToCart(0)}
-        >
-          <RemoveIcon />
-          <div className="text-2xs font-medium">Xoá</div>
-        </div>
-      </div>
-
-      <animated.div
-        {...bind()}
-        style={{ x }}
+      <div
         className="bg-white pl-4 flex items-center space-x-4 relative"
       >
-        <Checkbox
-          checked={selectedItemIds.includes(props.id)}
-          onChange={(checked) => {
-            if (checked) {
-              setSelectedItemIds([...selectedItemIds, props.id]);
-            } else {
-              setSelectedItemIds(
-                selectedItemIds.filter((id) => id !== props.id)
-              );
-            }
-          }}
-        />
-        <img src={props.product.image} className="w-14 h-14 rounded-lg" />
+        <img src={thump?.slug} className="w-24 h-24 rounded-lg" />
+        {Boolean(discount) && <div className="absolute top-2 left-[-12px] bg-danger w-8 h-8 items-center justify-center flex rounded-full text-white text-[10px] font-[900]">
+          -{discount}%
+        </div>}
         <div className="py-4 pr-4 flex-1 border-b-[0.5px] border-black/10">
-          <div className="text-sm">{props.product.name}</div>
-          {displayOptions && (
-            <div className="text-xs text-subtitle mt-0.5">{displayOptions}</div>
-          )}
-          <div className="flex items-center py-2 space-x-2">
-            <div className="flex-1 flex flex-wrap items-center space-x-0.5">
-              <div className="text-xs font-medium text-primary">
-                {formatPrice(props.product.price)}
+          <div className="text-lg font-[700] mb-2">{props.product.name}</div>
+
+          <div className="flex-1 flex flex-col flex-wrap gap-1">
+            {props.product.original_price && (
+              <div className="text-base line-through text-[##000c17]">
+                {formatPrice(Number(props.product.original_price))}
               </div>
-              {props.product.originalPrice && (
-                <div className="line-through text-subtitle text-3xs">
-                  {formatPrice(props.product.originalPrice)}
-                </div>
-              )}
+            )}
+            <div className="flex gap-4 align-center items-center">
+              <QuantityInput
+                value={props.quantity}
+                onChange={(value) => {
+                  updateQuantity(String(props.id), value);
+                }}
+              />
+              <div onClick={() => removeFromCart(String(props.id))}>
+                <RemoveIcon color="#586189" />
+              </div>
             </div>
-            <QuantityInput
-              value={quantity}
-              onChange={(value) => {
-                if (value <= 0) {
-                  setQuantity(1);
-                  api.start({ x: -SWIPE_TO_DELTE_OFFSET });
-                } else {
-                  setQuantity(value);
-                  if (value > quantity) {
-                    api.start({ x: 0 });
-                  }
-                }
-              }}
-            />
+            <div className="text-base font-[700] text-[#1E266E]">
+              {formatPrice(props.product.discount_price)}
+            </div>
           </div>
         </div>
-      </animated.div>
+      </div>
     </div>
   );
 }

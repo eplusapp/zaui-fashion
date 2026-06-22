@@ -1,3 +1,3 @@
 export default function HorizontalDivider() {
-  return <div className="w-full h-[0.5px] bg-black/10"></div>;
+  return <div className="w-full h-[10px] bg-black/5"></div>;
 }

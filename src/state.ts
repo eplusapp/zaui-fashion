@@ -1,8 +1,10 @@
 import { atom } from "jotai";
 import { atomFamily, unwrap } from "jotai/utils";
-import { Cart, Category, Color, Product } from "@/types";
+import { Cart, Category, Color } from "@/types";
 import { requestWithFallback } from "@/utils/request";
 import { getUserInfo } from "zmp-sdk";
+import { PaginatedResponse  } from "@/types/pagination";
+import { Product } from "@/types/products";
 
 export const userState = atom(() =>
   getUserInfo({
@@ -28,19 +30,21 @@ export const categoriesStateUpwrapped = unwrap(
 );
 
 export const productsState = atom(async (get) => {
-  const categories = await get(categoriesState);
-  const products = await requestWithFallback<
-    (Product & { categoryId: number })[]
-  >("/products", []);
-  return products.map((product) => ({
-    ...product,
-    category: categories.find(
-      (category) => category.id === product.categoryId
-    )!,
-  }));
+  const res = await requestWithFallback<
+    (PaginatedResponse<Product>)
+  >("/api/product/best-seller", {
+    data: [],
+    paginate: {
+      total_data: 0,
+      total_page: 0,
+      page: 0,
+      limit: 0
+    }
+  });
+  return res.data;
 });
 
-export const flashSaleProductsState = atom((get) => get(productsState));
+export const bestSaleProductsState = atom((get) => get(productsState));
 
 export const recommendedProductsState = atom((get) => get(productsState));
 

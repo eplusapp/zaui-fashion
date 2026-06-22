@@ -1,13 +1,14 @@
 import { useAtomValue } from "jotai";
 import { cartState } from "@/state";
 import CartItem from "./cart-item";
+import { useCart } from "@/hook/useCart";
 
 export default function CartList() {
-  const cart = useAtomValue(cartState);
+  const { items } = useCart();
 
   return (
-    <div className="flex-1 overflow-y-auto">
-      {cart.map((item) => (
+    <div className="flex-1">
+      {items.map((item) => (
         <CartItem key={item.id} {...item} />
       ))}
     </div>

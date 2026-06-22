@@ -8,6 +8,10 @@ import ProfilePage from "@/pages/profile";
 import SearchPage from "@/pages/search";
 import { createBrowserRouter } from "react-router-dom";
 import { getBasePath } from "@/utils/zma";
+import OrderPage from "./pages/order";
+import CheckoutPage from "./pages/checkout";
+import OrderDetailPage from "./pages/order/order-detail";
+import PaymentPage from "./pages/payment";
 
 const router = createBrowserRouter(
   [
@@ -45,6 +49,34 @@ const router = createBrowserRouter(
           },
         },
         {
+          path: "/orders",
+          element: <OrderPage />,
+          handle: {
+            title: "Đơn hàng",
+          },
+        },
+        {
+          path: "/orders/payment",
+          element: <PaymentPage />,
+          handle: {
+            title: "Thanh toán",
+          },
+        },
+        {
+          path: "/orders/:id",
+          element: <OrderDetailPage />,
+          handle: {
+            title: "Chi tiết đơn hàng",
+          },
+        },
+        {
+          path: "/check-out",
+          element: <CheckoutPage />,
+          handle: {
+            title: "Thanh toán",
+          },
+        },
+        {
           path: "/flash-sales",
           element: <ProductListPage />,
           handle: {
@@ -63,6 +95,11 @@ const router = createBrowserRouter(
           path: "/product/:id",
           element: <ProductDetailPage />,
           handle: {
+            title: ({ categories, params }) => {
+              const id = params.title || params.id
+              const title = id?.split('-')?.[0] || ''
+              return title?.toUpperCase()
+            },
             scrollRestoration: 0, // when user selects another product in related products, scroll to the top of the page
           },
         },

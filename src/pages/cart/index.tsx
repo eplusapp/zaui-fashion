@@ -6,11 +6,12 @@ import { useAtomValue } from "jotai";
 import { cartState } from "@/state";
 import { EmptyBoxIcon } from "@/components/vectors";
 import SelectAll from "./select-all";
+import { useCart } from "@/hook/useCart";
 
 export default function CartPage() {
-  const cart = useAtomValue(cartState);
+  const { items } = useCart();
 
-  if (!cart.length) {
+  if (!items.length) {
     return (
       <div className="w-full h-full flex flex-col items-center justify-center space-y-8">
         <EmptyBoxIcon />
@@ -22,12 +23,9 @@ export default function CartPage() {
   }
   return (
     <div className="w-full h-full flex flex-col">
-      <SelectAll />
       <HorizontalDivider />
       <CartList />
-      <HorizontalDivider />
-      <ApplyVoucher />
-      <HorizontalDivider />
+      <HorizontalDivider />      
       <CartSummary />
     </div>
   );

@@ -4,7 +4,7 @@ import SearchBar from "../../components/search-bar";
 import Category from "./category";
 import FlashSales from "./flash-sales";
 import HorizontalDivider from "@/components/horizontal-divider";
-import CategoryTabs from "@/components/category-tabs";
+import BestSales from "./best-sales";
 
 const HomePage: React.FunctionComponent = () => {
   const navigate = useNavigate();
@@ -12,14 +12,16 @@ const HomePage: React.FunctionComponent = () => {
     <div className="min-h-full bg-section">
       <div className="bg-background pt-2">
         <SearchBar onClick={() => navigate("/search")} />
-        <Banners />
+        <div className="mt-4">
+          <Banners />
+        </div>
       </div>
       <div className="bg-background space-y-2 mt-2">
-        <CategoryTabs />
         <Category />
       </div>
       <HorizontalDivider />
       <FlashSales />
+      <BestSales />
     </div>
   );
 };

@@ -1,6 +1,7 @@
 import { getConfig } from "./template";
 
 const API_URL = getConfig((config) => config.template.apiUrl);
+const ECO_URL = getConfig((config) => config.template.ecoUrl);
 
 const mockUrls = import.meta.glob<{ default: string }>("../mock/*.json", {
   query: "url",
@@ -9,23 +10,32 @@ const mockUrls = import.meta.glob<{ default: string }>("../mock/*.json", {
 
 export async function request<T>(
   path: string,
-  options?: RequestInit
+  options?: RequestInit & { baseUrl?: "api" | "eco" }
 ): Promise<T> {
-  const url = API_URL
-    ? `${API_URL}${path}`
-    : mockUrls[`../mock${path}.json`]?.default;
+  const baseUrl = options?.baseUrl === "eco" ? ECO_URL : API_URL;
+  const url = `${baseUrl}${path}`;
 
   if (!API_URL) {
     await new Promise((resolve) => setTimeout(resolve, 500));
   }
-  const response = await fetch(url, options);
+  const response = await fetch(url, {
+    ...options,
+    headers: {
+      "Content-Type": "application/json",
+      Accept: "application/json",
+      // "x-real-ip": "",
+      // "csrf-token": "",
+      // "csrf-secret": "",
+      ...(options?.headers || {}),
+    },
+  });
   return response.json() as T;
 }
 
 export async function requestWithFallback<T>(
   path: string,
   fallbackValue: T,
-  options?: RequestInit
+  options?: RequestInit & { baseUrl?: "api" | "eco" }
 ): Promise<T> {
   try {
     return await request<T>(path, options);
